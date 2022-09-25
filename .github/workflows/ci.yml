@@ -1,0 +1,77 @@
+
+on: push
+name: Continuous integration for workout generator.
+
+# For clippy check to post in PR
+permissions:
+  pull-requests: write
+  checks: write
+  contents: read
+
+jobs:
+  run-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+        test: [
+          {test-name: Unit tests, command-to-execute: cargo test --lib --bins},
+        {test-name: Doctests, command-to-execute: cargo test --doc},
+        # Currently no integration exist.
+        #{test-name: Integration tests., command-to-execute: cargo test --test \'*\'},
+        ]
+    runs-on: ${{ matrix.operating-system }}
+    name: ${{ matrix.test.test-name }} on ${{ matrix.operating-system }} 
+    steps:
+      - name: Checkout Repository.
+        uses: actions/checkout@v2
+
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - name: Run tests
+        run: ${{ matrix.test.command-to-execute }}
+    
+  clippy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v1
+      
+      - name: Install latest rust toolchain.
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+        
+      - name: Get clippy warnings and post to PR.
+        uses: actions-rs/clippy-check@v1
+        id: clippy
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Make sure all clippy issues lead to error.
+        run: cargo clippy -- -D warnings
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v1
+ 
+      - name: Install latest rust toolchain.
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      
+      - name: Check codebase for formatting errors.
+        run: cargo fmt --all -- --check
+
+# TODO: Add semantic-commit linter.
