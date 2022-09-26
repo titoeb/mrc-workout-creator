@@ -1,4 +1,4 @@
-use crate::workout_definition::positive_float;
+use crate::workout::positive_float;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Workout {
@@ -41,7 +41,7 @@ mod test {
     mod workout {
 
         use super::super::{EffortType, Workout, WorkoutUnit};
-        use crate::workout_definition::positive_float;
+        use crate::workout::positive_float;
         #[test]
         fn construct_workout() {
             let _ = Workout::new(
@@ -60,7 +60,7 @@ mod test {
     mod workout_unit {
 
         use super::super::{EffortType, WorkoutUnit};
-        use crate::workout_definition::positive_float;
+        use crate::workout::positive_float;
         #[test]
         fn construct_workout_unit() {
             let _ = WorkoutUnit::new(
@@ -74,7 +74,7 @@ mod test {
     }
     mod effort_type {
         use super::super::EffortType;
-        use crate::workout_definition::positive_float;
+        use crate::workout::positive_float;
         #[test]
         fn construct_watts() {
             let _ = EffortType::Watts(
