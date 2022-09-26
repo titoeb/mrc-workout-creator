@@ -1,11 +1,17 @@
+/// A Floating point number that can only take positive values.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct PositiveFloat {
+pub struct PositiveFloat {
     float: f64,
 }
 
+/// Erros that occur during the creation of a positive floating-point number.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum InvalidPositiveFloatError {
-    ProvidedNonPositiveNumber { number: f64 },
+pub enum InvalidPositiveFloatError {
+    /// A non-positive number was provided.
+    ProvidedNonPositiveNumber {
+        /// Actual number.
+        number: f64,
+    },
 }
 
 impl PositiveFloat {
