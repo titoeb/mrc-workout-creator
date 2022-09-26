@@ -2,12 +2,14 @@ use crate::workout_data::positive_float;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Workout<EffortType> {
+    name: String,
     description: String,
     units: Vec<WorkoutUnit<EffortType>>,
 }
 impl<EffortType> Workout<EffortType> {
-    fn new(description: &'_ str, units: Vec<WorkoutUnit<EffortType>>) -> Self {
+    fn new(name: &'_ str, description: &'_ str, units: Vec<WorkoutUnit<EffortType>>) -> Self {
         Self {
+            name: String::from(name),
             description: String::from(description),
             units,
         }
@@ -84,6 +86,7 @@ mod test {
         #[test]
         fn construct_workout() {
             let _ = Workout::new(
+                "test_workout",
                 "Workout for testing",
                 vec![WorkoutUnit::new(
                     positive_float::PositiveFloat::new(10.0)
