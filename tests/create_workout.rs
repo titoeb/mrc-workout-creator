@@ -11,7 +11,7 @@ fn create_workout() {
                 PositiveFloat::new(300.0).expect("A positive duration can be created."),
                 Watts::new(PositiveFloat::new(100.0).expect("Positive Percentage can be created")),
             )),
-            Effort::GroupOfEffort {
+            Effort::GroupEffort {
                 efforts: vec![
                     EffortUnit::new(
                         PositiveFloat::new(300.0).expect("A positive duration can be created."),
