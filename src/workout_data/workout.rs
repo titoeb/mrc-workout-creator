@@ -41,7 +41,7 @@ where
     /// A group of efforts that could be repeated like
     /// two Minutes of 250 Watts, then one minute of
     /// 300 watts.
-    GroupOfEffort {
+    GroupEffort {
         /// The individual efforts.
         efforts: Vec<EffortUnit<EffortType>>,
     },
@@ -132,7 +132,7 @@ mod test {
                                 .expect("Positive Percentage can be created"),
                         ),
                     )),
-                    Effort::GroupOfEffort {
+                    Effort::GroupEffort {
                         efforts: vec![
                             EffortUnit::new(
                                 positive_float::PositiveFloat::new(300.0)
@@ -185,7 +185,7 @@ mod test {
         }
         #[test]
         fn construct_group_of_effort() {
-            let _ = Effort::GroupOfEffort {
+            let _ = Effort::GroupEffort {
                 efforts: vec![
                     EffortUnit::new(
                         positive_float::PositiveFloat::new(300.0)
