@@ -4,4 +4,4 @@
 #![allow(dead_code)]
 
 /// Definitions of all base types to construct a workout.
-mod workout_data;
+pub mod workout_data;
