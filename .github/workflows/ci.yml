@@ -1,6 +1,9 @@
-
-on: push
 name: Continuous integration for workout generator.
+on: 
+  push:
+      branches:
+        - master
+  pull_request:
 
 # For clippy check to post in PR
 permissions:
@@ -38,6 +41,7 @@ jobs:
     
   clippy-check:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout repository.
         uses: actions/checkout@v1
@@ -49,15 +53,9 @@ jobs:
           override: true
           components: rustfmt, clippy
         
-      - name: Get clippy warnings and post to PR.
-        uses: actions-rs/clippy-check@v1
-        id: clippy
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: Make sure all clippy issues lead to error.
         run: cargo clippy -- -D warnings
-
+ 
   format-check:
     runs-on: ubuntu-latest
     steps:
@@ -74,4 +72,34 @@ jobs:
       - name: Check codebase for formatting errors.
         run: cargo fmt --all -- --check
 
-# TODO: Add semantic-commit linter.
+  clippy-check-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v1
+      
+      - name: Install latest rust toolchain.
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+        
+      - name: Get clippy warnings and post to PR.
+        uses: actions-rs/clippy-check@v1
+        id: clippy
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  validate-semantic-commits:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' 
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v1
+      
+      - name:  Setup gitlint and executed check.
+        run: |
+          pip install gitlint-core==0.17.0
+          gitlint --config .gitlint-configuration --commits "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
