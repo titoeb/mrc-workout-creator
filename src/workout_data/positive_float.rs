@@ -15,7 +15,8 @@ pub enum InvalidPositiveFloatError {
 }
 
 impl PositiveFloat {
-    pub(crate) fn new(float: f64) -> Result<Self, InvalidPositiveFloatError> {
+    /// Try to create a new positive floating point number.
+    pub fn new(float: f64) -> Result<Self, InvalidPositiveFloatError> {
         if float > 0.0 {
             return Ok(Self { float });
         }

@@ -20,8 +20,7 @@ jobs:
         test: [
           {test-name: Unit tests, command-to-execute: cargo test --lib --bins},
         {test-name: Doctests, command-to-execute: cargo test --doc},
-        # Currently no integration exist.
-        #{test-name: Integration tests., command-to-execute: cargo test --test \'*\'},
+        {test-name: Integration tests, command-to-execute: cargo test --test '*'},
         ]
     runs-on: ${{ matrix.operating-system }}
     name: ${{ matrix.test.test-name }} on ${{ matrix.operating-system }} 
