@@ -4,4 +4,4 @@
 #![allow(dead_code)]
 
 /// Definitions of all base types to construct a workout.
-mod workout_definition;
+mod workout;
