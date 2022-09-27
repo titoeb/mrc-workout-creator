@@ -22,6 +22,17 @@ impl PositiveFloat {
         }
         Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: float })
     }
+    /// Convert the positive float to a number that can be displayed in the crm-file.
+    pub fn to_crm(&self) -> String {
+        format!("{:.2}", self.float)
+    }
+    /// Add a positive floating-point number
+    /// to a another one.
+    pub fn add(&self, other: &PositiveFloat) -> Self {
+        PositiveFloat {
+            float: self.float + other.float,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -45,6 +56,24 @@ mod test {
         assert_eq!(
             PositiveFloat::new(-1.0),
             Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: -1.0 })
+        )
+    }
+
+    #[test]
+    fn crm_format() {
+        assert_eq!(
+            PositiveFloat::new(10.0)
+                .expect("A positive positive floating-point can be created")
+                .to_crm(),
+            "10.00"
+        )
+    }
+
+    #[test]
+    fn add() {
+        assert_eq!(
+            PositiveFloat { float: 1.0 }.add(&PositiveFloat { float: 2.0 }),
+            PositiveFloat { float: 3.0 }
         )
     }
 }
