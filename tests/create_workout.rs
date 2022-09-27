@@ -2,7 +2,7 @@ use crm_workout_creator::workout_data::positive_float::PositiveFloat;
 use crm_workout_creator::workout_data::workout::{Effort, EffortUnit, Watts, Workout};
 
 #[test]
-fn create_workout() {
+fn create_watt_workout() {
     let _new_workout = Workout::new(
         "test_workout",
         "Workout for testing",

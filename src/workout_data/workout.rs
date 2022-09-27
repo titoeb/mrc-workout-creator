@@ -3,7 +3,7 @@ use crate::workout_data::positive_float;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Workout<EffortType>
 where
-    EffortType: GenerateEffortHeader,
+    EffortType: GenerateCRMEffortHeader + ConvertEffortToCRM,
 {
     /// Name of the workout.
     /// The full name of the file will be <name>.crm.
@@ -16,7 +16,7 @@ where
 }
 impl<EffortType> Workout<EffortType>
 where
-    EffortType: GenerateEffortHeader,
+    EffortType: GenerateCRMEffortHeader + ConvertEffortToCRM,
 {
     /// Create a new Workout
     pub fn new(name: &'_ str, description: &'_ str, efforts: Vec<Effort<EffortType>>) -> Self {
@@ -24,6 +24,17 @@ where
             name: String::from(name),
             description: String::from(description),
             efforts,
+        }
+    }
+
+    fn crm_header(&self) -> String {
+        format! {
+            "[COURSE HEADER]\n\
+            DESCRIPTION = {}\n\
+            {}\n\
+            [END COURSE HEADER]",
+            self.description,
+            EffortType::generate_effort_header()
         }
     }
 }
@@ -34,7 +45,7 @@ where
 #[derive(Debug, Clone, PartialEq)]
 pub enum Effort<EffortType>
 where
-    EffortType: GenerateEffortHeader,
+    EffortType: GenerateCRMEffortHeader + ConvertEffortToCRM,
 {
     /// A single unit, e.g. 400 watts for a minute.
     SingleEffort(EffortUnit<EffortType>),
@@ -50,12 +61,18 @@ where
 /// Combining a type of effort with a duration
 /// for which it should be executed.
 #[derive(Debug, Clone, PartialEq)]
-pub struct EffortUnit<EffortType> {
+pub struct EffortUnit<EffortType>
+where
+    EffortType: ConvertEffortToCRM + GenerateCRMEffortHeader,
+{
     duration_in_minutes: positive_float::PositiveFloat,
     effort: EffortType,
 }
 
-impl<EffortType> EffortUnit<EffortType> {
+impl<EffortType> EffortUnit<EffortType>
+where
+    EffortType: ConvertEffortToCRM + GenerateCRMEffortHeader,
+{
     /// Creating a new Effort unit.
     pub fn new(duration_in_minutes: positive_float::PositiveFloat, effort: EffortType) -> Self {
         Self {
@@ -63,14 +80,31 @@ impl<EffortType> EffortUnit<EffortType> {
             effort,
         }
     }
+    fn effort_in_crm(&self) -> String {
+        self.effort.to_crm()
+    }
+    fn to_crm(&self, starting_minute: positive_float::PositiveFloat) -> String {
+        format! {
+            "{}\t{}\n\
+            {}\t{}", starting_minute.to_crm(), self.effort_in_crm(), starting_minute.add(&self.duration_in_minutes).to_crm(), self.effort_in_crm()
+        }
+    }
 }
 /// This function is used to create the correct Header in
 /// the crm file. For "Wattage", that would be
 /// MINUTES WATTAGE
-pub trait GenerateEffortHeader {
+pub trait GenerateCRMEffortHeader {
     /// How does the correct header in csr file for
     /// this type?
     fn generate_effort_header() -> &'static str;
+}
+
+/// How to convert the specific effort like Watt
+/// into a string that can be displayed within
+/// a crm file.
+pub trait ConvertEffortToCRM {
+    /// Generate CRM representation
+    fn to_crm(&self) -> String;
 }
 
 /// A Wattage that should be executed.
@@ -86,9 +120,15 @@ impl Watts {
     }
 }
 
-impl GenerateEffortHeader for Watts {
+impl GenerateCRMEffortHeader for Watts {
     fn generate_effort_header() -> &'static str {
         "MINUTES WATTS"
+    }
+}
+
+impl ConvertEffortToCRM for Watts {
+    fn to_crm(&self) -> String {
+        self.watts.to_crm()
     }
 }
 
@@ -106,18 +146,37 @@ impl PercentOfFTP {
     }
 }
 
-impl GenerateEffortHeader for PercentOfFTP {
+impl GenerateCRMEffortHeader for PercentOfFTP {
     fn generate_effort_header() -> &'static str {
         "MINUTES PERCENTAGE"
     }
 }
 
+impl ConvertEffortToCRM for PercentOfFTP {
+    fn to_crm(&self) -> String {
+        self.percentage.to_crm()
+    }
+}
+
 #[cfg(test)]
 mod test {
+    use super::{ConvertEffortToCRM, GenerateCRMEffortHeader};
+    struct TestActivity;
+    impl GenerateCRMEffortHeader for TestActivity {
+        fn generate_effort_header() -> &'static str {
+            "MINUTES EFFORT-UNIT"
+        }
+    }
+    impl ConvertEffortToCRM for TestActivity {
+        fn to_crm(&self) -> String {
+            String::from("100.00")
+        }
+    }
     mod workout {
-
         use super::super::{Effort, EffortUnit, Watts, Workout};
+        use super::TestActivity;
         use crate::workout_data::positive_float;
+
         #[test]
         fn construct_workout() {
             let _ = Workout::new(
@@ -154,6 +213,20 @@ mod test {
                     },
                 ],
             );
+        }
+
+        #[test]
+        fn create_crm_header_watts() {
+            let workout: Workout<TestActivity> =
+                Workout::new("test_workout", "Workout for testing", vec![]);
+
+            assert_eq!(
+                workout.crm_header(),
+                "[COURSE HEADER]\n\
+            DESCRIPTION = Workout for testing\n\
+            MINUTES EFFORT-UNIT\n\
+            [END COURSE HEADER]"
+            )
         }
     }
 
@@ -208,11 +281,12 @@ mod test {
         }
     }
     mod effort_unit {
-
         use super::super::{EffortUnit, PercentOfFTP};
+        use super::TestActivity;
         use crate::workout_data::positive_float;
+
         #[test]
-        fn construct_effort_unit() {
+        fn construct() {
             let _ = EffortUnit::new(
                 positive_float::PositiveFloat::new(60.0)
                     .expect("A positive duration can be created."),
@@ -221,6 +295,78 @@ mod test {
                         .expect("Positive Percentage can be created"),
                 ),
             );
+        }
+
+        #[test]
+        fn effort_crm() {
+            assert_eq!(
+                EffortUnit::new(
+                    positive_float::PositiveFloat::new(60.0)
+                        .expect("A positive duration can be created."),
+                    TestActivity {}
+                )
+                .effort_in_crm(),
+                "100.00"
+            )
+        }
+        #[test]
+        fn to_crm() {
+            assert_eq!(
+                EffortUnit::new(
+                    positive_float::PositiveFloat::new(5.0)
+                        .expect("A positive duration can be created."),
+                    TestActivity {}
+                )
+                .to_crm(
+                    positive_float::PositiveFloat::new(5.0)
+                        .expect("A positive positive float can be created.")
+                ),
+                "5.00	100.00\n\
+                10.00	100.00"
+            )
+        }
+    }
+    mod individual_efforts {
+        use super::super::{PercentOfFTP, Watts};
+        use crate::workout_data::{positive_float, workout::ConvertEffortToCRM};
+
+        #[test]
+        fn construct_watts() {
+            let _ = Watts::new(
+                positive_float::PositiveFloat::new(300.0)
+                    .expect("Positive Percentage can be created"),
+            );
+        }
+        #[test]
+        fn display_watts_in_crm() {
+            assert_eq!(
+                Watts::new(
+                    positive_float::PositiveFloat::new(300.0)
+                        .expect("Positive Percentage can be created"),
+                )
+                .to_crm(),
+                "300.00"
+            )
+        }
+
+        #[test]
+        fn construct_percentage_of_ftp() {
+            let _ = PercentOfFTP::new(
+                positive_float::PositiveFloat::new(100.0)
+                    .expect("Positive Percentage can be created"),
+            );
+        }
+
+        #[test]
+        fn display_percentage_of_ftp_in_crm() {
+            assert_eq!(
+                PercentOfFTP::new(
+                    positive_float::PositiveFloat::new(100.0)
+                        .expect("Positive Percentage can be created"),
+                )
+                .to_crm(),
+                "100.00"
+            )
         }
     }
 }
