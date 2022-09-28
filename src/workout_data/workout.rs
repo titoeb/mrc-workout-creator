@@ -1,4 +1,4 @@
-use crate::workout_data::positive_float;
+use crate::workout_data::positive_float::PositiveFloat;
 /// A planed workout.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Workout<EffortType>
@@ -65,7 +65,7 @@ pub struct EffortUnit<EffortType>
 where
     EffortType: ConvertEffortToCRM + GenerateCRMEffortHeader,
 {
-    duration_in_minutes: positive_float::PositiveFloat,
+    duration_in_minutes: PositiveFloat,
     effort: EffortType,
 }
 
@@ -74,7 +74,7 @@ where
     EffortType: ConvertEffortToCRM + GenerateCRMEffortHeader,
 {
     /// Creating a new Effort unit.
-    pub fn new(duration_in_minutes: positive_float::PositiveFloat, effort: EffortType) -> Self {
+    pub fn new(duration_in_minutes: PositiveFloat, effort: EffortType) -> Self {
         Self {
             duration_in_minutes,
             effort,
@@ -83,7 +83,7 @@ where
     fn effort_in_crm(&self) -> String {
         self.effort.to_crm()
     }
-    fn to_crm(&self, starting_minute: positive_float::PositiveFloat) -> String {
+    fn to_crm(&self, starting_minute: PositiveFloat) -> String {
         format! {
             "{}\t{}\n\
             {}\t{}", starting_minute.to_crm(), self.effort_in_crm(), starting_minute.add(&self.duration_in_minutes).to_crm(), self.effort_in_crm()
@@ -110,12 +110,12 @@ pub trait ConvertEffortToCRM {
 /// A Wattage that should be executed.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Watts {
-    watts: positive_float::PositiveFloat,
+    watts: PositiveFloat,
 }
 
 impl Watts {
     /// Creating a Wattage
-    pub fn new(watts: positive_float::PositiveFloat) -> Self {
+    pub fn new(watts: PositiveFloat) -> Self {
         Self { watts }
     }
 }
@@ -137,11 +137,11 @@ impl ConvertEffortToCRM for Watts {
 /// of the athlete.
 #[derive(Debug, Clone, PartialEq)]
 pub struct PercentOfFTP {
-    percentage: positive_float::PositiveFloat,
+    percentage: PositiveFloat,
 }
 impl PercentOfFTP {
     /// Create a new percentage of FTP.
-    pub fn new(percentage: positive_float::PositiveFloat) -> Self {
+    pub fn new(percentage: PositiveFloat) -> Self {
         Self { percentage }
     }
 }
@@ -175,7 +175,7 @@ mod test {
     mod workout {
         use super::super::{Effort, EffortUnit, Watts, Workout};
         use super::TestActivity;
-        use crate::workout_data::positive_float;
+        use crate::workout_data::positive_float::PositiveFloat;
 
         #[test]
         fn construct_workout() {
@@ -184,30 +184,18 @@ mod test {
                 "Workout for testing",
                 vec![
                     Effort::SingleEffort(EffortUnit::new(
-                        positive_float::PositiveFloat::new(300.0)
-                            .expect("A positive duration can be created."),
-                        Watts::new(
-                            positive_float::PositiveFloat::new(100.0)
-                                .expect("Positive Percentage can be created"),
-                        ),
+                        PositiveFloat::new(300.0).unwrap(),
+                        Watts::new(PositiveFloat::new(100.0).unwrap()),
                     )),
                     Effort::GroupEffort {
                         efforts: vec![
                             EffortUnit::new(
-                                positive_float::PositiveFloat::new(300.0)
-                                    .expect("A positive duration can be created."),
-                                Watts::new(
-                                    positive_float::PositiveFloat::new(100.0)
-                                        .expect("Positive Percentage can be created"),
-                                ),
+                                PositiveFloat::new(300.0).unwrap(),
+                                Watts::new(PositiveFloat::new(100.0).unwrap()),
                             ),
                             EffortUnit::new(
-                                positive_float::PositiveFloat::new(60.0)
-                                    .expect("A positive duration can be created."),
-                                Watts::new(
-                                    positive_float::PositiveFloat::new(150.0)
-                                        .expect("Positive Percentage can be created"),
-                                ),
+                                PositiveFloat::new(60.0).unwrap(),
+                                Watts::new(PositiveFloat::new(150.0).unwrap()),
                             ),
                         ],
                     },
@@ -232,28 +220,20 @@ mod test {
 
     mod effort {
         use super::super::{Effort, EffortUnit, PercentOfFTP, Watts};
-        use crate::workout_data::positive_float;
+        use crate::workout_data::positive_float::PositiveFloat;
         #[test]
         fn create_single_effort_with_watts() {
             let _ = Effort::SingleEffort(EffortUnit::new(
-                positive_float::PositiveFloat::new(300.0)
-                    .expect("A positive duration can be created."),
-                Watts::new(
-                    positive_float::PositiveFloat::new(100.0)
-                        .expect("Positive Percentage can be created"),
-                ),
+                PositiveFloat::new(300.0).unwrap(),
+                Watts::new(PositiveFloat::new(100.0).unwrap()),
             ));
         }
 
         #[test]
         fn create_single_effort_with_percentage() {
             let _ = Effort::SingleEffort(EffortUnit::new(
-                positive_float::PositiveFloat::new(300.0)
-                    .expect("A positive duration can be created."),
-                PercentOfFTP::new(
-                    positive_float::PositiveFloat::new(100.0)
-                        .expect("Positive Percentage can be created"),
-                ),
+                PositiveFloat::new(300.0).unwrap(),
+                PercentOfFTP::new(PositiveFloat::new(100.0).unwrap()),
             ));
         }
         #[test]
@@ -261,20 +241,12 @@ mod test {
             let _ = Effort::GroupEffort {
                 efforts: vec![
                     EffortUnit::new(
-                        positive_float::PositiveFloat::new(300.0)
-                            .expect("A positive duration can be created."),
-                        PercentOfFTP::new(
-                            positive_float::PositiveFloat::new(100.0)
-                                .expect("Positive Percentage can be created"),
-                        ),
+                        PositiveFloat::new(300.0).unwrap(),
+                        PercentOfFTP::new(PositiveFloat::new(100.0).unwrap()),
                     ),
                     EffortUnit::new(
-                        positive_float::PositiveFloat::new(60.0)
-                            .expect("A positive duration can be created."),
-                        PercentOfFTP::new(
-                            positive_float::PositiveFloat::new(150.0)
-                                .expect("Positive Percentage can be created"),
-                        ),
+                        PositiveFloat::new(60.0).unwrap(),
+                        PercentOfFTP::new(PositiveFloat::new(150.0).unwrap()),
                     ),
                 ],
             };
@@ -283,17 +255,13 @@ mod test {
     mod effort_unit {
         use super::super::{EffortUnit, PercentOfFTP};
         use super::TestActivity;
-        use crate::workout_data::positive_float;
+        use crate::workout_data::positive_float::PositiveFloat;
 
         #[test]
         fn construct() {
             let _ = EffortUnit::new(
-                positive_float::PositiveFloat::new(60.0)
-                    .expect("A positive duration can be created."),
-                PercentOfFTP::new(
-                    positive_float::PositiveFloat::new(150.0)
-                        .expect("Positive Percentage can be created"),
-                ),
+                PositiveFloat::new(60.0).unwrap(),
+                PercentOfFTP::new(PositiveFloat::new(150.0).unwrap()),
             );
         }
 
@@ -301,8 +269,7 @@ mod test {
         fn effort_crm() {
             assert_eq!(
                 EffortUnit::new(
-                    positive_float::PositiveFloat::new(60.0)
-                        .expect("A positive duration can be created."),
+                    PositiveFloat::new(60.0).expect("A positive duration can be created."),
                     TestActivity {}
                 )
                 .effort_in_crm(),
@@ -312,14 +279,13 @@ mod test {
         #[test]
         fn to_crm() {
             assert_eq!(
-                EffortUnit::new(
-                    positive_float::PositiveFloat::new(5.0)
-                        .expect("A positive duration can be created."),
-                    TestActivity {}
+                EffortUnit::new(PositiveFloat::new(5.0).unwrap(), TestActivity {})
+                    .to_crm(PositiveFloat::new(5.0).unwrap()),
+                "5.00	100.00\n\
+                10.00	100.00"
                 )
-                .to_crm(
-                    positive_float::PositiveFloat::new(5.0)
-                        .expect("A positive positive float can be created.")
+        }
+
                 ),
                 "5.00	100.00\n\
                 10.00	100.00"
@@ -328,43 +294,30 @@ mod test {
     }
     mod individual_efforts {
         use super::super::{PercentOfFTP, Watts};
-        use crate::workout_data::{positive_float, workout::ConvertEffortToCRM};
+        use crate::workout_data::positive_float::PositiveFloat;
+        use crate::workout_data::workout::ConvertEffortToCRM;
 
         #[test]
         fn construct_watts() {
-            let _ = Watts::new(
-                positive_float::PositiveFloat::new(300.0)
-                    .expect("Positive Percentage can be created"),
-            );
+            let _ = Watts::new(PositiveFloat::new(300.0).unwrap());
         }
         #[test]
         fn display_watts_in_crm() {
             assert_eq!(
-                Watts::new(
-                    positive_float::PositiveFloat::new(300.0)
-                        .expect("Positive Percentage can be created"),
-                )
-                .to_crm(),
+                Watts::new(PositiveFloat::new(300.0).unwrap(),).to_crm(),
                 "300.00"
             )
         }
 
         #[test]
         fn construct_percentage_of_ftp() {
-            let _ = PercentOfFTP::new(
-                positive_float::PositiveFloat::new(100.0)
-                    .expect("Positive Percentage can be created"),
-            );
+            let _ = PercentOfFTP::new(PositiveFloat::new(100.0).unwrap());
         }
 
         #[test]
         fn display_percentage_of_ftp_in_crm() {
             assert_eq!(
-                PercentOfFTP::new(
-                    positive_float::PositiveFloat::new(100.0)
-                        .expect("Positive Percentage can be created"),
-                )
-                .to_crm(),
+                PercentOfFTP::new(PositiveFloat::new(100.0).unwrap(),).to_crm(),
                 "100.00"
             )
         }
