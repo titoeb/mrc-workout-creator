@@ -11,15 +11,15 @@ use crm_workout_creator::workout_data::workout::{
 //             "test-1",
 //             vec![
 //                 Effort::SingleEffort(EffortUnit::new(
-//                     PositiveFloat::new(5.0).expect("A positive duration can be created."),
+//                     PositiveFloat::new(5.0).unwrap(),
 //                     Watts::new(
-//                         PositiveFloat::new(80.0).expect("Positive Percentage can be created")
+//                         PositiveFloat::new(80.0).unwrap()
 //                     ),
 //                 )),
 //                 Effort::SingleEffort(EffortUnit::new(
-//                     PositiveFloat::new(5.0).expect("A positive duration can be created."),
+//                     PositiveFloat::new(5.0)..unwrap(),
 //                     Watts::new(
-//                         PositiveFloat::new(80.0).expect("Positive Percentage can be created")
+//                         PositiveFloat::new(80.0)..unwrap()
 //                     ),
 //                 )),
 //             ],
@@ -46,15 +46,15 @@ use crm_workout_creator::workout_data::workout::{
 //             "test-1",
 //             vec![
 //                 Effort::SingleEffort(EffortUnit::new(
-//                     PositiveFloat::new(5.0).expect("A positive duration can be created."),
+//                     PositiveFloat::new(5.0).unwrap(),
 //                     PercentOfFTP::new(
-//                         PositiveFloat::new(80.0).expect("Positive Percentage can be created")
+//                         PositiveFloat::new(80.0).unwrap()
 //                     ),
 //                 )),
 //                 Effort::SingleEffort(EffortUnit::new(
-//                     PositiveFloat::new(5.0).expect("A positive duration can be created."),
+//                     PositiveFloat::new(5.0).unwrap(),
 //                     PercentOfFTP::new(
-//                         PositiveFloat::new(80.0).expect("Positive Percentage can be created")
+//                         PositiveFloat::new(80.0).unwrap()
 //                     ),
 //                 )),
 //             ],

@@ -8,22 +8,18 @@ fn create_watt_workout() {
         "Workout for testing",
         vec![
             Effort::SingleEffort(EffortUnit::new(
-                PositiveFloat::new(300.0).expect("A positive duration can be created."),
-                Watts::new(PositiveFloat::new(100.0).expect("Positive Percentage can be created")),
+                PositiveFloat::new(300.0).unwrap(),
+                Watts::new(PositiveFloat::new(100.0).unwrap()),
             )),
             Effort::GroupEffort {
                 efforts: vec![
                     EffortUnit::new(
-                        PositiveFloat::new(300.0).expect("A positive duration can be created."),
-                        Watts::new(
-                            PositiveFloat::new(100.0).expect("Positive Percentage can be created"),
-                        ),
+                        PositiveFloat::new(300.0).unwrap(),
+                        Watts::new(PositiveFloat::new(100.0).unwrap()),
                     ),
                     EffortUnit::new(
-                        PositiveFloat::new(60.0).expect("A positive duration can be created."),
-                        Watts::new(
-                            PositiveFloat::new(150.0).expect("Positive Percentage can be created"),
-                        ),
+                        PositiveFloat::new(60.0).unwrap(),
+                        Watts::new(PositiveFloat::new(150.0).unwrap()),
                     ),
                 ],
             },
