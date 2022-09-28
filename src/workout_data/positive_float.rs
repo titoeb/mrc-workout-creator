@@ -28,7 +28,7 @@ impl PositiveFloat {
     }
     /// Add a positive floating-point number
     /// to a another one.
-    pub fn add(&self, other: &PositiveFloat) -> Self {
+    pub fn add(self, other: &PositiveFloat) -> Self {
         PositiveFloat {
             float: self.float + other.float,
         }
