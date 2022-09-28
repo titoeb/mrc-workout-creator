@@ -1,4 +1,4 @@
-/// A Floating point number that can only take positive values.
+/// A Floating point number that can only take non-negativevalues.
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositiveFloat {
     float: f64,
@@ -17,7 +17,7 @@ pub enum InvalidPositiveFloatError {
 impl PositiveFloat {
     /// Try to create a new positive floating point number.
     pub fn new(float: f64) -> Result<Self, InvalidPositiveFloatError> {
-        if float > 0.0 {
+        if float >= 0.0 {
             return Ok(Self { float });
         }
         Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: float })
@@ -46,10 +46,7 @@ mod test {
 
     #[test]
     fn cannot_create_invalid_positive_from_zero() {
-        assert_eq!(
-            PositiveFloat::new(0.0),
-            Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: 0.0 })
-        )
+        assert_eq!(PositiveFloat::new(0.0), Ok(PositiveFloat { float: 0.0 }))
     }
     #[test]
     fn cannot_create_invalid_positive_from_negative_number() {
