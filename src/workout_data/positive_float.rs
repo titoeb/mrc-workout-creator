@@ -1,3 +1,4 @@
+use std::ops::Add;
 /// A Floating point number that can only take non-negativevalues.
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositiveFloat {
@@ -26,9 +27,13 @@ impl PositiveFloat {
     pub fn to_crm(&self) -> String {
         format!("{:.2}", self.float)
     }
+}
+
+impl Add for PositiveFloat {
+    type Output = Self;
     /// Add a positive floating-point number
     /// to a another one.
-    pub fn add(self, other: &PositiveFloat) -> Self {
+    fn add(self, other: Self) -> Self {
         PositiveFloat {
             float: self.float + other.float,
         }
@@ -69,7 +74,7 @@ mod test {
     #[test]
     fn add() {
         assert_eq!(
-            PositiveFloat { float: 1.0 }.add(&PositiveFloat { float: 2.0 }),
+            PositiveFloat { float: 1.0 } + PositiveFloat { float: 2.0 },
             PositiveFloat { float: 3.0 }
         )
     }
