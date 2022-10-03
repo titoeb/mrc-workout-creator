@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::ops::Add;
 /// A Floating point number that can only take non-negativevalues.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PositiveFloat {
     float: f64,
 }
@@ -43,6 +44,7 @@ impl Add for PositiveFloat {
 #[cfg(test)]
 mod test {
     use super::{InvalidPositiveFloatError, PositiveFloat};
+    use crate::testing::serialize_deserialize;
 
     #[test]
     fn create_valid_positive_float() {
@@ -76,6 +78,15 @@ mod test {
         assert_eq!(
             PositiveFloat { float: 1.0 } + PositiveFloat { float: 2.0 },
             PositiveFloat { float: 3.0 }
+        )
+    }
+
+    #[test]
+    fn test_serialization() {
+        let point_to_serialize = PositiveFloat { float: 1.0 };
+        assert_eq!(
+            point_to_serialize,
+            serialize_deserialize(&point_to_serialize)
         )
     }
 }
