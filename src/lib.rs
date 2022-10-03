@@ -5,3 +5,7 @@
 
 /// Definitions of all base types to construct a workout.
 pub mod workout_data;
+
+#[cfg(test)]
+/// Testing utilities
+pub mod testing;

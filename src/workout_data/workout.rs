@@ -1,6 +1,7 @@
 use crate::workout_data::positive_float::PositiveFloat;
+use serde::{Deserialize, Serialize};
 /// A planed workout.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Workout<EffortType>
 where
     EffortType: GenerateCRMEffortHeader + ConvertEffortToCRM,
@@ -66,7 +67,7 @@ where
 /// Individual efforts in a training.
 /// Can either be a single unit, or contain
 /// multiple ones.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Effort<EffortType>
 where
     EffortType: GenerateCRMEffortHeader + ConvertEffortToCRM,
@@ -142,7 +143,7 @@ where
 
 /// Combining a type of effort with a duration
 /// for which it should be executed.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EffortUnit<EffortType>
 where
     EffortType: ConvertEffortToCRM + GenerateCRMEffortHeader,
@@ -194,7 +195,7 @@ pub trait ConvertEffortToCRM {
 }
 
 /// A Wattage that should be executed.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Watts {
     watts: PositiveFloat,
 }
@@ -221,7 +222,7 @@ impl ConvertEffortToCRM for Watts {
 /// Percentage of FTP that should be execute.
 /// Then the effort is proportional to the FTP
 /// of the athlete.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PercentOfFTP {
     percentage: PositiveFloat,
 }
@@ -247,6 +248,8 @@ impl ConvertEffortToCRM for PercentOfFTP {
 #[cfg(test)]
 mod test {
     use super::{ConvertEffortToCRM, GenerateCRMEffortHeader};
+    use serde::{Deserialize, Serialize};
+    #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
     struct TestActivity;
     impl GenerateCRMEffortHeader for TestActivity {
         fn generate_effort_header() -> &'static str {
@@ -261,6 +264,7 @@ mod test {
     mod workout {
         use super::super::{Effort, EffortUnit, Watts, Workout};
         use super::TestActivity;
+        use crate::testing::serialize_deserialize;
         use crate::workout_data::positive_float::PositiveFloat;
 
         #[test]
@@ -333,11 +337,32 @@ mod test {
                 [END COURSE DATA]"
             )
         }
+        #[test]
+        fn test_serialization() {
+            let workout_to_test_serialization = Workout::new(
+                "test_workout",
+                "test-1",
+                vec![
+                    Effort::SingleEffort(EffortUnit::new(
+                        PositiveFloat::new(5.0).unwrap(),
+                        Watts::new(PositiveFloat::new(80.0).unwrap()),
+                    )),
+                    Effort::SingleEffort(EffortUnit::new(
+                        PositiveFloat::new(10.0).unwrap(),
+                        Watts::new(PositiveFloat::new(100.0).unwrap()),
+                    )),
+                ],
+            );
+            assert_eq!(
+                workout_to_test_serialization,
+                serialize_deserialize(&workout_to_test_serialization)
+            )
+        }
     }
 
     mod effort {
         use super::super::{Effort, EffortUnit, PercentOfFTP, Watts};
-        use crate::workout_data::positive_float::PositiveFloat;
+        use crate::{testing::serialize_deserialize, workout_data::positive_float::PositiveFloat};
         #[test]
         fn create_single_effort_with_watts() {
             let _ = Effort::SingleEffort(EffortUnit::new(
@@ -368,12 +393,26 @@ mod test {
                 ],
             };
         }
+
+        #[test]
+        fn test_serialization() {
+            let effort_to_serialize = Effort::SingleEffort(EffortUnit::new(
+                PositiveFloat::new(300.0).unwrap(),
+                PercentOfFTP::new(PositiveFloat::new(100.0).unwrap()),
+            ));
+
+            assert_eq!(
+                effort_to_serialize,
+                serialize_deserialize(&effort_to_serialize)
+            )
+        }
     }
     mod effort_unit {
         use super::super::{
             efforts_to_crm, extract_initial_starting_minutes, EffortUnit, PercentOfFTP, Watts,
         };
         use super::TestActivity;
+        use crate::testing::serialize_deserialize;
         use crate::workout_data::positive_float::PositiveFloat;
 
         #[test]
@@ -466,9 +505,23 @@ mod test {
                 )
             )
         }
+
+        #[test]
+        fn test_serialization() {
+            let effort_unit_to_serialize = EffortUnit::new(
+                PositiveFloat::new(60.0).expect("A positive duration can be created."),
+                TestActivity {},
+            );
+
+            assert_eq!(
+                effort_unit_to_serialize,
+                serialize_deserialize(&effort_unit_to_serialize)
+            )
+        }
     }
     mod individual_efforts {
         use super::super::{PercentOfFTP, Watts};
+        use crate::testing::serialize_deserialize;
         use crate::workout_data::positive_float::PositiveFloat;
         use crate::workout_data::workout::ConvertEffortToCRM;
 
@@ -485,6 +538,15 @@ mod test {
         }
 
         #[test]
+        fn watts_serialization() {
+            let watts_to_serialize = Watts::new(PositiveFloat::new(300.0).unwrap()).to_crm();
+            assert_eq!(
+                watts_to_serialize,
+                serialize_deserialize(&watts_to_serialize)
+            );
+        }
+
+        #[test]
         fn construct_percentage_of_ftp() {
             let _ = PercentOfFTP::new(PositiveFloat::new(100.0).unwrap());
         }
@@ -495,6 +557,16 @@ mod test {
                 PercentOfFTP::new(PositiveFloat::new(100.0).unwrap(),).to_crm(),
                 "100.00"
             )
+        }
+
+        #[test]
+        fn percentage_of_ftp_serialization() {
+            let percentage_to_serialize =
+                PercentOfFTP::new(PositiveFloat::new(100.0).unwrap()).to_crm();
+            assert_eq!(
+                percentage_to_serialize,
+                serialize_deserialize(&percentage_to_serialize)
+            );
         }
     }
 }
