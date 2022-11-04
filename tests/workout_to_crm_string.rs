@@ -1,7 +1,5 @@
 use crm_workout_creator::workout_data::positive_float::PositiveFloat;
-use crm_workout_creator::workout_data::workout::{
-    Effort, EffortUnit, PercentOfFTP, Watts, Workout,
-};
+use crm_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
 
 #[test]
 fn simple_percent_of_ftp_workout_to_crm() {
@@ -10,15 +8,16 @@ fn simple_percent_of_ftp_workout_to_crm() {
             "test_workout",
             "test-1",
             vec![
-                Effort::SingleEffort(EffortUnit::new(
+                Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    PercentOfFTP::new(PositiveFloat::new(80.0).unwrap()),
-                )),
-                Effort::SingleEffort(EffortUnit::new(
+                    PositiveFloat::new(80.0).unwrap(),
+                ),
+                Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    PercentOfFTP::new(PositiveFloat::new(100.0).unwrap()),
-                )),
+                    PositiveFloat::new(100.0).unwrap()
+                ),
             ],
+            WorkoutType::PercentOfFTP
         )
         .to_crm(),
         "[COURSE HEADER]\n\
@@ -41,15 +40,16 @@ fn simple_watt_workout_to_crm() {
             "test_workout",
             "test-1",
             vec![
-                Effort::SingleEffort(EffortUnit::new(
+                Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    Watts::new(PositiveFloat::new(80.0).unwrap()),
-                )),
-                Effort::SingleEffort(EffortUnit::new(
+                    PositiveFloat::new(80.0).unwrap(),
+                ),
+                Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    Watts::new(PositiveFloat::new(100.0).unwrap()),
-                )),
+                    PositiveFloat::new(100.0).unwrap()
+                ),
             ],
+            WorkoutType::Watts
         )
         .to_crm(),
         "[COURSE HEADER]\n\
