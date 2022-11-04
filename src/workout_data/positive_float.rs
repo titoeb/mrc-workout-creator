@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::ops::Add;
+use std::{num::ParseFloatError, ops::Add};
 /// A Floating point number that can only take non-negativevalues.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PositiveFloat {
@@ -14,6 +14,16 @@ pub enum InvalidPositiveFloatError {
         /// Actual number.
         number: f64,
     },
+    InvalidStringToParse {
+        message: String,
+    },
+}
+impl From<ParseFloatError> for InvalidPositiveFloatError {
+    fn from(parse_error: ParseFloatError) -> Self {
+        Self::InvalidStringToParse {
+            message: format!("{}", parse_error),
+        }
+    }
 }
 
 impl PositiveFloat {
@@ -28,6 +38,24 @@ impl PositiveFloat {
     pub fn to_crm(&self) -> String {
         format!("{:.2}", self.float)
     }
+    /// Extract the floating point number from the float
+    pub fn to_float(&self) -> f64 {
+        self.float
+    }
+}
+impl TryFrom<String> for PositiveFloat {
+    type Error = InvalidPositiveFloatError;
+    fn try_from(potential_float: String) -> Result<Self, Self::Error> {
+        let float = potential_float.trim().parse::<f64>()?;
+        Self::new(float)
+    }
+}
+
+impl TryFrom<&mut String> for PositiveFloat {
+    type Error = InvalidPositiveFloatError;
+    fn try_from(potential_float: &mut String) -> Result<Self, Self::Error> {
+        Self::try_from(potential_float.to_string())
+    }
 }
 
 impl Add for PositiveFloat {
@@ -38,6 +66,12 @@ impl Add for PositiveFloat {
         PositiveFloat {
             float: self.float + other.float,
         }
+    }
+}
+
+impl From<PositiveFloat> for String {
+    fn from(positive_float: PositiveFloat) -> Self {
+        positive_float.to_crm()
     }
 }
 
@@ -87,6 +121,43 @@ mod test {
         assert_eq!(
             point_to_serialize,
             serialize_deserialize(&point_to_serialize)
+        )
+    }
+    #[test]
+    fn valid_conversion_from_string() {
+        assert_eq!(
+            PositiveFloat::try_from(String::from("1.0")).unwrap(),
+            PositiveFloat { float: 1.0 }
+        )
+    }
+    #[test]
+    fn valid_conversion_from_string_with_int() {
+        assert_eq!(
+            PositiveFloat::try_from(String::from("3")).unwrap(),
+            PositiveFloat { float: 3.0 }
+        )
+    }
+    #[test]
+    fn valid_conversion_from_string_with_spaces() {
+        assert_eq!(
+            PositiveFloat::try_from(String::from(" 90.0 ")).unwrap(),
+            PositiveFloat { float: 90.0 }
+        )
+    }
+    #[test]
+    fn invalid_conversion_from_string_no_float() {
+        assert_eq!(
+            PositiveFloat::try_from(String::from("abcd")),
+            Err(InvalidPositiveFloatError::InvalidStringToParse {
+                message: String::from("invalid float literal")
+            })
+        )
+    }
+    #[test]
+    fn invalid_conversion_from_string_no_valid_positive_string() {
+        assert_eq!(
+            PositiveFloat::try_from(String::from("-1.0")),
+            Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: -1.0 })
         )
     }
 }

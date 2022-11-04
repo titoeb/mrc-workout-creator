@@ -27,6 +27,10 @@ jobs:
     steps:
       - name: Checkout Repository.
         uses: actions/checkout@v2
+      
+      - name: Setup ubuntu
+        if: ${{ contains(matrix.operating-system, 'ubuntu') }}
+        run: sudo apt-get install build-essential libgtk-3-dev
 
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
@@ -44,6 +48,9 @@ jobs:
       - name: Checkout repository.
         uses: actions/checkout@v1
       
+      - name: Setup ubuntu
+        run: sudo apt-get install build-essential libgtk-3-dev
+      
       - name: Install latest rust toolchain.
         uses: actions-rs/toolchain@v1
         with:
@@ -59,6 +66,9 @@ jobs:
     steps:
       - name: Checkout repository.
         uses: actions/checkout@v1
+      
+      - name: Setup ubuntu
+        run: sudo apt-get install build-essential libgtk-3-dev
  
       - name: Install latest rust toolchain.
         uses: actions-rs/toolchain@v1
@@ -76,7 +86,10 @@ jobs:
     steps:
       - name: Checkout repository.
         uses: actions/checkout@v1
-      
+
+      - name: Setup ubuntu
+        run: sudo apt-get install build-essential libgtk-3-dev
+ 
       - name: Install latest rust toolchain.
         uses: actions-rs/toolchain@v1
         with:
