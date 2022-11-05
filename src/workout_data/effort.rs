@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Effort {
     pub(crate) duration_in_minutes: PositiveFloat,
-    pub(crate) value: PositiveFloat,
+    pub(crate) starting_value: PositiveFloat,
+    pub(crate) ending_value: PositiveFloat,
 
     #[serde(skip)]
     pub gui_state: EffortState,
@@ -44,22 +45,24 @@ impl Default for EffortState {
 
 impl Effort {
     /// Creating a new Effort unit.
-    pub fn new(duration_in_minutes: PositiveFloat, value: PositiveFloat) -> Self {
+    pub fn new(
+        duration_in_minutes: PositiveFloat,
+        starting_value: PositiveFloat,
+        ending_value: Option<PositiveFloat>,
+    ) -> Self {
         Self {
             duration_in_minutes,
-            value,
+            starting_value: starting_value.clone(),
+            ending_value: ending_value.unwrap_or(starting_value),
             gui_state: EffortState::default(),
         }
-    }
-    fn effort_in_crm(&self) -> String {
-        self.value.to_crm()
     }
     pub fn to_crm(&self, starting_minute: PositiveFloat) -> (String, PositiveFloat) {
         let end_of_effort = starting_minute.clone() + self.duration_in_minutes.clone();
         (
             format! {
                 "{}\t{}\n\
-                {}\t{}", starting_minute.to_crm(), self.effort_in_crm(), end_of_effort.to_crm(), self.effort_in_crm()
+                {}\t{}", starting_minute.to_crm(), self.starting_value.to_crm(), end_of_effort.to_crm(), self.ending_value.to_crm()
             },
             end_of_effort,
         )
@@ -68,7 +71,7 @@ impl Effort {
     pub fn to_edit(&mut self) {
         self.gui_state = EffortState::Editing {
             value_state: text_input::State::default(),
-            value: String::from(self.value.clone()),
+            value: String::from(self.starting_value.clone()),
             duration_in_minutes_state: text_input::State::default(),
             duration_in_minutes: String::from(self.duration_in_minutes.clone()),
         }
@@ -83,7 +86,7 @@ impl Effort {
         {
             self.duration_in_minutes = PositiveFloat::try_from(duration_in_minutes)
                 .expect("Please provide a valid positive float.");
-            self.value =
+            self.starting_value =
                 PositiveFloat::try_from(value).expect("Please provide a valid positive float.");
             self.gui_state = EffortState::Idle {
                 edit_button: button::State::new(),
@@ -129,6 +132,7 @@ mod tests {
             let _ = Effort::new(
                 PositiveFloat::new(60.0).unwrap(),
                 PositiveFloat::new(150.0).unwrap(),
+                None,
             );
         }
 
@@ -137,9 +141,11 @@ mod tests {
             assert_eq!(
                 Effort::new(
                     PositiveFloat::new(60.0).expect("A positive duration can be created."),
-                    PositiveFloat::new(100.0).unwrap()
+                    PositiveFloat::new(100.0).unwrap(),
+                    None,
                 )
-                .effort_in_crm(),
+                .starting_value
+                .to_crm(),
                 "100.00"
             )
         }
@@ -148,7 +154,8 @@ mod tests {
             assert_eq!(
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap()
+                    PositiveFloat::new(100.0).unwrap(),
+                    None,
                 )
                 .to_crm(PositiveFloat::new(5.0).unwrap()),
                 (
@@ -168,11 +175,13 @@ mod tests {
                     &vec![
                         Effort::new(
                             PositiveFloat::new(7.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap()
+                            PositiveFloat::new(100.0).unwrap(),
+                            None
                         ),
                         Effort::new(
                             PositiveFloat::new(9.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap()
+                            PositiveFloat::new(100.0).unwrap(),
+                            None
                         )
                     ],
                     &PositiveFloat::new(5.0).unwrap()
@@ -191,19 +200,23 @@ mod tests {
                     &vec![
                         Effort::new(
                             PositiveFloat::new(5.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap()
+                            PositiveFloat::new(100.0).unwrap(),
+                            None
                         ),
                         Effort::new(
                             PositiveFloat::new(10.0).unwrap(),
-                            PositiveFloat::new(150.0).unwrap()
+                            PositiveFloat::new(150.0).unwrap(),
+                            None
                         ),
                         Effort::new(
                             PositiveFloat::new(15.0).unwrap(),
-                            PositiveFloat::new(200.0).unwrap()
+                            PositiveFloat::new(200.0).unwrap(),
+                            None
                         ),
                         Effort::new(
                             PositiveFloat::new(5.0).unwrap(),
-                            PositiveFloat::new(120.0).unwrap()
+                            PositiveFloat::new(120.0).unwrap(),
+                            None
                         ),
                     ],
                     &PositiveFloat::new(5.0).unwrap()
@@ -229,6 +242,7 @@ mod tests {
             let effort_unit_to_serialize = Effort::new(
                 PositiveFloat::new(60.0).expect("A positive duration can be created."),
                 PositiveFloat::new(100.0).unwrap(),
+                None,
             );
 
             assert_eq!(

@@ -172,14 +172,17 @@ mod test {
                     Effort::new(
                         PositiveFloat::new(300.0).unwrap(),
                         PositiveFloat::new(100.0).unwrap(),
+                        None,
                     ),
                     Effort::new(
                         PositiveFloat::new(300.0).unwrap(),
                         PositiveFloat::new(100.0).unwrap(),
+                        None,
                     ),
                     Effort::new(
                         PositiveFloat::new(60.0).unwrap(),
                         PositiveFloat::new(150.0).unwrap(),
+                        None,
                     ),
                 ],
                 WorkoutType::Watts,
@@ -214,10 +217,12 @@ mod test {
                         Effort::new(
                             PositiveFloat::new(5.0).unwrap(),
                             PositiveFloat::new(80.0).unwrap(),
+                            None,
                         ),
                         Effort::new(
                             PositiveFloat::new(10.0).unwrap(),
                             PositiveFloat::new(100.0).unwrap(),
+                            None,
                         ),
                     ],
                     WorkoutType::Watts,
@@ -244,10 +249,12 @@ mod test {
                     Effort::new(
                         PositiveFloat::new(5.0).unwrap(),
                         PositiveFloat::new(80.0).unwrap(),
+                        None,
                     ),
                     Effort::new(
                         PositiveFloat::new(10.0).unwrap(),
                         PositiveFloat::new(100.0).unwrap(),
+                        None,
                     ),
                 ],
                 WorkoutType::Watts,
@@ -265,6 +272,7 @@ mod test {
                 vec![Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
                     PositiveFloat::new(80.0).unwrap(),
+                    None,
                 )],
                 WorkoutType::Watts,
             );
@@ -272,6 +280,7 @@ mod test {
             workout_to_add_effort.add_effort(Effort::new(
                 PositiveFloat::new(10.0).unwrap(),
                 PositiveFloat::new(80.0).unwrap(),
+                None,
             ));
 
             assert_eq!(
@@ -280,10 +289,12 @@ mod test {
                     Effort::new(
                         PositiveFloat::new(5.0).unwrap(),
                         PositiveFloat::new(80.0).unwrap(),
+                        None,
                     ),
                     Effort::new(
                         PositiveFloat::new(10.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap()
+                        PositiveFloat::new(80.0).unwrap(),
+                        None,
                     ),
                 ],
             )
@@ -297,10 +308,12 @@ mod test {
                     Effort::new(
                         PositiveFloat::new(5.0).unwrap(),
                         PositiveFloat::new(80.0).unwrap(),
+                        None,
                     ),
                     Effort::new(
                         PositiveFloat::new(15.0).unwrap(),
                         PositiveFloat::new(200.0).unwrap(),
+                        None,
                     ),
                 ],
                 WorkoutType::Watts,
