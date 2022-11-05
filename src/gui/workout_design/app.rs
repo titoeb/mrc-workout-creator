@@ -4,7 +4,7 @@ use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::Visualizer;
 use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
-use iced::{button, Alignment, Column, Container, Element, Length, Row, Text};
+use iced::{button, scrollable, Alignment, Column, Container, Element, Length, Row, Text};
 use rfd::FileDialog;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -14,6 +14,7 @@ pub struct WorkoutDesigner {
     effort_unit_input: EffortUnitInput,
     visualizer: Visualizer,
     export_button: button::State,
+    scrollable_efforts: scrollable::State,
 }
 
 impl Default for WorkoutDesigner {
@@ -28,6 +29,7 @@ impl Default for WorkoutDesigner {
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
             export_button: button::State::new(),
+            scrollable_efforts: scrollable::State::new(),
         }
     }
 }
@@ -57,6 +59,7 @@ impl From<Workout> for WorkoutDesigner {
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
             export_button: button::State::new(),
+            scrollable_efforts: scrollable::State::new(),
         }
     }
 }
@@ -72,6 +75,7 @@ impl WorkoutDesigner {
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
             export_button: button::State::new(),
+            scrollable_efforts: scrollable::State::new(),
         }
     }
 
@@ -151,7 +155,7 @@ impl WorkoutDesigner {
                 .padding(20)
                 .push(
                     Column::new()
-                        .push(self.workout.view())
+                        .push(self.workout.view(&mut self.scrollable_efforts))
                         .push(
                             button::Button::new(
                                 &mut self.export_button,

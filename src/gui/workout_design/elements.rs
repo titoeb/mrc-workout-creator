@@ -3,7 +3,8 @@ use crate::gui::crm_creator::WorkoutMessage;
 use crate::workout_data::positive_float::{InvalidPositiveFloatError, PositiveFloat};
 use crate::workout_data::{effort, workout};
 use iced::{
-    container, text_input, Alignment, Button, Color, Column, Element, Row, Text, TextInput,
+    container, scrollable, text_input, Alignment, Button, Color, Column, Element, Row, Text,
+    TextInput,
 };
 
 #[derive(Debug, Clone)]
@@ -169,15 +170,24 @@ impl container::StyleSheet for WorkoutSectionDesign {
 }
 
 impl<'a> workout::Workout {
-    pub fn view(&'a mut self) -> impl Into<Element<'a, WorkoutMessage>> {
+    pub fn view(
+        &'a mut self,
+        scrollable_effort: &'a mut scrollable::State,
+    ) -> impl Into<Element<'a, WorkoutMessage>> {
         container::Container::new(
             Column::new()
                 .spacing(20)
-                .push(Column::new().push(Row::new().push(WhiteText::new("Minutes   |   Value\n"))))
-                .push(self.efforts.iter_mut().enumerate().fold(
-                    Column::new().spacing(5).align_items(Alignment::End),
-                    |column, (effort_index, effort)| column.push(effort.view(effort_index)),
-                )),
+                .push(WhiteText::new("Minutes   |   Value\n"))
+                .push(
+                    self.efforts.iter_mut().enumerate().fold(
+                        scrollable::Scrollable::new(scrollable_effort)
+                            .spacing(5)
+                            .align_items(Alignment::End),
+                        |scrollable, (effort_index, effort)| {
+                            scrollable.push(effort.view(effort_index))
+                        },
+                    ),
+                ),
         )
         .style(WorkoutSectionDesign {})
     }
