@@ -11,10 +11,12 @@ fn simple_percent_of_ftp_workout_to_crm() {
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
                     PositiveFloat::new(80.0).unwrap(),
+                    None,
                 ),
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap()
+                    PositiveFloat::new(100.0).unwrap(),
+                    None,
                 ),
             ],
             WorkoutType::PercentOfFTP
@@ -43,10 +45,12 @@ fn simple_watt_workout_to_crm() {
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
                     PositiveFloat::new(80.0).unwrap(),
+                    None,
                 ),
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap()
+                    PositiveFloat::new(100.0).unwrap(),
+                    None,
                 ),
             ],
             WorkoutType::Watts

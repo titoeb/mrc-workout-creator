@@ -144,6 +144,7 @@ impl TryFrom<EffortUnitInput> for effort::Effort {
         Ok(effort::Effort::new(
             PositiveFloat::try_from(effort_unit_input.current_duration())?,
             PositiveFloat::try_from(effort_unit_input.current_effort())?,
+            None,
         ))
     }
 }
@@ -205,7 +206,7 @@ impl<'a> effort::Effort {
                     Row::new()
                         .spacing(10)
                         .push(WhiteText::new(self.duration_in_minutes.to_crm()))
-                        .push(WhiteText::new(self.value.to_crm())),
+                        .push(WhiteText::new(self.starting_value.to_crm())),
                 )
                 .push(Button::new(delete_button, Text::new("Delete")).on_press(
                     WorkoutMessage::Design(WorkoutDesignerMessage::Effort(

@@ -41,7 +41,7 @@ fn draw_efforts(bounds: &Rectangle, efforts: &[effort::Effort]) -> Vec<Rectangle
 
     let efforts = efforts
         .iter()
-        .map(|effort| effort.value.to_float() as f32)
+        .map(|effort| effort.starting_value.to_float() as f32)
         .collect();
 
     let offset_between_durations = 1.0;
