@@ -36,7 +36,8 @@ impl Default for WorkoutDesigner {
 
 #[derive(Debug, Clone)]
 pub enum WorkoutDesignerMessage {
-    EffortUnitInputEffortChanged(String),
+    EffortUnitStartingValueChanged(String),
+    EffortUnitEndingValueChanged(String),
     EffortUnitInputDurationChanged(String),
     CreateTask,
     Effort(usize, EffortMessage),
@@ -47,7 +48,8 @@ pub enum WorkoutDesignerMessage {
 pub enum EffortMessage {
     Edit,
     ModificationDone,
-    UpdateValue(String),
+    UpdateStartingValue(String),
+    UpdateEndingValue(String),
     UpdateDurationInMinutes(String),
     Delete,
 }
@@ -81,8 +83,11 @@ impl WorkoutDesigner {
 
     pub fn update(&mut self, message: WorkoutDesignerMessage) {
         match message {
-            WorkoutDesignerMessage::EffortUnitInputEffortChanged(value) => {
-                self.effort_unit_input.set_effort(value);
+            WorkoutDesignerMessage::EffortUnitStartingValueChanged(value) => {
+                self.effort_unit_input.set_starting_value(value);
+            }
+            WorkoutDesignerMessage::EffortUnitEndingValueChanged(value) => {
+                self.effort_unit_input.set_ending_value(value);
             }
             WorkoutDesignerMessage::EffortUnitInputDurationChanged(value) => {
                 self.effort_unit_input.set_duration(value);
@@ -109,9 +114,14 @@ impl WorkoutDesigner {
                 index,
                 EffortMessage::UpdateDurationInMinutes(updated_duration_in_minutes),
             ) => self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes),
-            WorkoutDesignerMessage::Effort(index, EffortMessage::UpdateValue(updated_value)) => {
-                self.workout.efforts[index].update_value(updated_value)
-            }
+            WorkoutDesignerMessage::Effort(
+                index,
+                EffortMessage::UpdateStartingValue(updated_value),
+            ) => self.workout.efforts[index].update_starting_value(updated_value),
+            WorkoutDesignerMessage::Effort(
+                index,
+                EffortMessage::UpdateEndingValue(updated_value),
+            ) => self.workout.efforts[index].update_ending_value(updated_value),
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(crm_file_to_write_to) = FileDialog::new()
                     .add_filter("Only Select crm files", &["crm"])
