@@ -21,8 +21,10 @@ pub enum EffortState {
         delete_button: button::State,
     },
     Editing {
-        value_state: text_input::State,
-        value: String,
+        starting_value_state: text_input::State,
+        starting_value: String,
+        ending_value_state: text_input::State,
+        ending_value: String,
         duration_in_minutes_state: text_input::State,
         duration_in_minutes: String,
     },
@@ -70,34 +72,47 @@ impl Effort {
 
     pub fn to_edit(&mut self) {
         self.gui_state = EffortState::Editing {
-            value_state: text_input::State::default(),
-            value: String::from(self.starting_value.clone()),
+            starting_value_state: text_input::State::default(),
+            starting_value: String::from(self.starting_value.clone()),
+            ending_value_state: text_input::State::default(),
+            ending_value: String::from(self.ending_value.clone()),
             duration_in_minutes_state: text_input::State::default(),
             duration_in_minutes: String::from(self.duration_in_minutes.clone()),
         }
     }
     pub fn to_idle(&mut self) {
         if let EffortState::Editing {
-            value_state: _,
-            value,
+            starting_value_state: _,
+            starting_value,
+            ending_value_state: _,
+            ending_value,
             duration_in_minutes_state: _,
             duration_in_minutes,
         } = &mut self.gui_state
         {
-            self.duration_in_minutes = PositiveFloat::try_from(duration_in_minutes)
-                .expect("Please provide a valid positive float.");
-            self.starting_value =
-                PositiveFloat::try_from(value).expect("Please provide a valid positive float.");
-            self.gui_state = EffortState::Idle {
-                edit_button: button::State::new(),
-                delete_button: button::State::new(),
+            let new_ending_value = if ending_value.is_empty() {
+                None
+            } else {
+                Some(
+                    PositiveFloat::try_from(ending_value)
+                        .expect("Please provide a valid positive float."),
+                )
             };
+            *self = Effort::new(
+                PositiveFloat::try_from(duration_in_minutes)
+                    .expect("Please provide a valid positive float."),
+                PositiveFloat::try_from(starting_value)
+                    .expect("Please provide a valid positive float."),
+                new_ending_value,
+            );
         }
     }
     pub fn update_duration_of_effort(&mut self, updated_duration_of_effort: String) {
         if let EffortState::Editing {
-            value_state: _,
-            value: _,
+            starting_value_state: _,
+            starting_value: _,
+            ending_value_state: _,
+            ending_value: _,
             duration_in_minutes_state: _,
             duration_in_minutes,
         } = &mut self.gui_state
@@ -105,15 +120,30 @@ impl Effort {
             *duration_in_minutes = updated_duration_of_effort;
         }
     }
-    pub fn update_value(&mut self, updated_value: String) {
+    pub fn update_starting_value(&mut self, updated_starting_value: String) {
         if let EffortState::Editing {
-            value_state: _,
-            value,
+            starting_value_state: _,
+            starting_value,
+            ending_value: _,
+            ending_value_state: _,
             duration_in_minutes_state: _,
             duration_in_minutes: _,
         } = &mut self.gui_state
         {
-            *value = updated_value;
+            *starting_value = updated_starting_value;
+        }
+    }
+    pub fn update_ending_value(&mut self, updated_ending_value: String) {
+        if let EffortState::Editing {
+            starting_value_state: _,
+            starting_value: _,
+            ending_value,
+            ending_value_state: _,
+            duration_in_minutes_state: _,
+            duration_in_minutes: _,
+        } = &mut self.gui_state
+        {
+            *ending_value = updated_ending_value;
         }
     }
 }
