@@ -92,6 +92,7 @@ impl EffortUnitInput {
     }
     pub fn clear(&mut self) {
         self.effort.starting_value.clear();
+        self.effort.ending_value.clear();
         self.duration.value.clear();
     }
 
