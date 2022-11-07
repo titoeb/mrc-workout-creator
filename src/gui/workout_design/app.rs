@@ -124,7 +124,7 @@ impl WorkoutDesigner {
             ) => self.workout.efforts[index].update_ending_value(updated_value),
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(crm_file_to_write_to) = FileDialog::new()
-                    .add_filter("Only Select crm files", &["crm"])
+                    .add_filter("Only Select mrc files", &["mrc"])
                     .set_directory("~")
                     .save_file()
                 {
