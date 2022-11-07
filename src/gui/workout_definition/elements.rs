@@ -1,4 +1,4 @@
-use crate::gui::crm_creator::WorkoutMessage;
+use crate::gui::mrc_creator::WorkoutMessage;
 use crate::gui::workout_definition::app::WorkoutDefinerMessage;
 use crate::workout_data::workout::WorkoutType;
 use iced::alignment::{Alignment, Horizontal};

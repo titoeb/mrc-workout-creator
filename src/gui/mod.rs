@@ -1,6 +1,6 @@
 /// The main application for creating workout in
-/// the crm format.
-pub mod crm_creator;
+/// the mrc format.
+pub mod mrc_creator;
 
 /// The initial page of the WorkoutCreator on which
 /// summary information about the workout are entered.

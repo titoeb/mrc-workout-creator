@@ -1,12 +1,12 @@
 use super::elements;
-use crate::gui::crm_creator::WorkoutMessage;
+use crate::gui::mrc_creator::WorkoutMessage;
 use crate::workout_data::workout::WorkoutType;
 use iced::button;
 use iced::text_input::State;
 use iced::widget::pick_list;
 use iced::{Column, Container, Element, Length};
 
-/// Holding the state of the overall CRMCreator Application.
+/// Holding the state of the overall MRCCreator Application.
 #[derive(Default)]
 pub struct WorkoutDefiner {
     pick_list: pick_list::State<WorkoutType>,

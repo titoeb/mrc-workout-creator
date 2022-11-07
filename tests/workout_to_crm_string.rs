@@ -1,8 +1,8 @@
-use crm_workout_creator::workout_data::positive_float::PositiveFloat;
-use crm_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
+use mrc_workout_creator::workout_data::positive_float::PositiveFloat;
+use mrc_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
 
 #[test]
-fn simple_percent_of_ftp_workout_to_crm() {
+fn simple_percent_of_ftp_workout_to_mrc() {
     assert_eq!(
         Workout::new(
             "test_workout",
@@ -21,7 +21,7 @@ fn simple_percent_of_ftp_workout_to_crm() {
             ],
             WorkoutType::PercentOfFTP
         )
-        .to_crm(),
+        .to_mrc(),
         "[COURSE HEADER]\n\
     DESCRIPTION = test-1\n\
     MINUTES PERCENTAGE\n\
@@ -36,7 +36,7 @@ fn simple_percent_of_ftp_workout_to_crm() {
 }
 
 #[test]
-fn simple_watt_workout_to_crm() {
+fn simple_watt_workout_to_mrc() {
     assert_eq!(
         Workout::new(
             "test_workout",
@@ -55,7 +55,7 @@ fn simple_watt_workout_to_crm() {
             ],
             WorkoutType::Watts
         )
-        .to_crm(),
+        .to_mrc(),
         "[COURSE HEADER]\n\
         DESCRIPTION = test-1\n\
         MINUTES WATTS\n\

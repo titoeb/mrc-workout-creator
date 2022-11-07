@@ -1,5 +1,5 @@
 use super::elements::EffortUnitInput;
-use crate::gui::crm_creator::WorkoutMessage;
+use crate::gui::mrc_creator::WorkoutMessage;
 use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::Visualizer;
 use crate::workout_data::workout::Workout;
@@ -123,17 +123,17 @@ impl WorkoutDesigner {
                 EffortMessage::UpdateEndingValue(updated_value),
             ) => self.workout.efforts[index].update_ending_value(updated_value),
             WorkoutDesignerMessage::ExportButtonPressed => {
-                if let Some(crm_file_to_write_to) = FileDialog::new()
+                if let Some(mrc_file_to_write_to) = FileDialog::new()
                     .add_filter("Only Select mrc files", &["mrc"])
                     .set_directory("~")
                     .save_file()
                 {
-                    if let (Some(mut opened_crm_file), Some(mut opened_json)) = (
-                        open_or_create(&crm_file_to_write_to),
-                        open_or_create(&get_path_to_json_file(&crm_file_to_write_to)),
+                    if let (Some(mut opened_mrc_file), Some(mut opened_json)) = (
+                        open_or_create(&mrc_file_to_write_to),
+                        open_or_create(&get_path_to_json_file(&mrc_file_to_write_to)),
                     ) {
-                        let _error_when_writing_crm_file =
-                            opened_crm_file.write(self.workout.to_crm().as_bytes());
+                        let _error_when_writing_mrc_file =
+                            opened_mrc_file.write(self.workout.to_mrc().as_bytes());
                         let _error_when_writing_json_file = opened_json
                             .write(serde_json::to_string(&self.workout).unwrap().as_bytes());
                     }
@@ -199,6 +199,6 @@ fn open_or_create(path_to_file: &path::PathBuf) -> Option<File> {
         .ok()
 }
 
-fn get_path_to_json_file(path_to_crm_file: &path::Path) -> path::PathBuf {
-    path_to_crm_file.with_extension("").with_extension("json")
+fn get_path_to_json_file(path_to_mrc_file: &path::Path) -> path::PathBuf {
+    path_to_mrc_file.with_extension("").with_extension("json")
 }

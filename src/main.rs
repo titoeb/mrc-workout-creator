@@ -1,6 +1,6 @@
-use crm_workout_creator::gui::crm_creator;
 use iced::Sandbox;
+use mrc_workout_creator::gui::mrc_creator;
 
 pub fn main() -> iced::Result {
-    crm_creator::CRMCreator::run(crm_creator::settings())
+    mrc_creator::MRCCreator::run(mrc_creator::settings())
 }
