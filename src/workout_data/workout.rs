@@ -6,10 +6,10 @@ use std::ops::Add;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct Workout {
     /// Name of the workout.
-    /// The full name of the file will be <name>.crm.
+    /// The full name of the file will be <name>.mrc.
     name: String,
     /// Description of the workout.
-    /// Will be in the `.crm`-file
+    /// Will be in the `.mrc`-file
     description: String,
     /// The individual efforst of the Workout.
     pub(crate) efforts: Vec<Effort>,
@@ -37,40 +37,40 @@ impl Workout {
         Self::new(name, description, vec![], workout_type)
     }
 
-    /// Generate the crm representation of a workout.
-    pub fn to_crm(&self) -> String {
-        format!("{}\n{}", self.crm_head(), self.crm_body())
+    /// Generate the mrc representation of a workout.
+    pub fn to_mrc(&self) -> String {
+        format!("{}\n{}", self.mrc_head(), self.mrc_body())
     }
 
-    fn crm_head(&self) -> String {
+    fn mrc_head(&self) -> String {
         format! {
             "[COURSE HEADER]\n\
             DESCRIPTION = {}\n\
             {}\n\
             [END COURSE HEADER]",
             self.description,
-            self.workout_type.create_crm_string()
+            self.workout_type.create_mrc_string()
         }
     }
-    fn crm_body(&self) -> String {
+    fn mrc_body(&self) -> String {
         format!(
             "[COURSE DATA]\n\
             {}\n\
             [END COURSE DATA]",
-            self.crm_body_workouts()
+            self.mrc_body_workouts()
         )
     }
-    fn crm_body_workouts(&self) -> String {
-        let mut efforts_as_crm = Vec::new();
+    fn mrc_body_workouts(&self) -> String {
+        let mut efforts_as_mrc = Vec::new();
         let mut current_starting_minute = PositiveFloat::new(0.0).unwrap();
 
         for effort in &self.efforts {
-            let (effort_as_crm, new_starting_minute) = effort.to_crm(current_starting_minute);
-            efforts_as_crm.push(effort_as_crm);
+            let (effort_as_mrc, new_starting_minute) = effort.to_mrc(current_starting_minute);
+            efforts_as_mrc.push(effort_as_mrc);
             current_starting_minute = new_starting_minute;
         }
 
-        efforts_as_crm.join("\n")
+        efforts_as_mrc.join("\n")
     }
     /// Add a new effort to the workout.
     pub fn add_effort(&mut self, effort: Effort) {
@@ -108,7 +108,7 @@ pub enum WorkoutType {
 }
 
 impl WorkoutType {
-    fn create_crm_string(&self) -> String {
+    fn create_mrc_string(&self) -> String {
         match self {
             WorkoutType::Watts => String::from("MINUTES WATTS"),
             WorkoutType::PercentOfFTP => String::from("MINUTES PERCENTAGE"),
@@ -116,7 +116,7 @@ impl WorkoutType {
     }
 }
 
-pub fn efforts_to_crm(
+pub fn efforts_to_mrc(
     efforts: &Vec<Effort>,
     starting_minute: &PositiveFloat,
 ) -> (String, PositiveFloat) {
@@ -124,7 +124,7 @@ pub fn efforts_to_crm(
     let effort_string_with_final_minute = efforts
         .iter()
         .zip(starting_minutes.into_iter())
-        .map(|(effort, starting_minute)| effort.to_crm(starting_minute))
+        .map(|(effort, starting_minute)| effort.to_mrc(starting_minute))
         .collect::<Vec<(String, PositiveFloat)>>();
 
     (
@@ -190,7 +190,7 @@ mod test {
         }
 
         #[test]
-        fn create_crm_header_watts() {
+        fn create_mrc_header_watts() {
             let workout: Workout = Workout::new(
                 "test_workout",
                 "Workout for testing",
@@ -199,7 +199,7 @@ mod test {
             );
 
             assert_eq!(
-                workout.crm_head(),
+                workout.mrc_head(),
                 "[COURSE HEADER]\n\
             DESCRIPTION = Workout for testing\n\
             MINUTES WATTS\n\
@@ -208,7 +208,7 @@ mod test {
         }
 
         #[test]
-        fn workout_to_crm() {
+        fn workout_to_mrc() {
             assert_eq!(
                 Workout::new(
                     "test_workout",
@@ -227,7 +227,7 @@ mod test {
                     ],
                     WorkoutType::Watts,
                 )
-                .to_crm(),
+                .to_mrc(),
                 "[COURSE HEADER]\n\
                 DESCRIPTION = test-1\n\
                 MINUTES WATTS\n\

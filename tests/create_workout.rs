@@ -1,5 +1,5 @@
-use crm_workout_creator::workout_data::positive_float::PositiveFloat;
-use crm_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
+use mrc_workout_creator::workout_data::positive_float::PositiveFloat;
+use mrc_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
 
 #[test]
 fn create_watt_workout() {

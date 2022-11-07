@@ -59,12 +59,12 @@ impl Effort {
             gui_state: EffortState::default(),
         }
     }
-    pub fn to_crm(&self, starting_minute: PositiveFloat) -> (String, PositiveFloat) {
+    pub fn to_mrc(&self, starting_minute: PositiveFloat) -> (String, PositiveFloat) {
         let end_of_effort = starting_minute.clone() + self.duration_in_minutes.clone();
         (
             format! {
                 "{}\t{}\n\
-                {}\t{}", starting_minute.to_crm(), self.starting_value.to_crm(), end_of_effort.to_crm(), self.ending_value.to_crm()
+                {}\t{}", starting_minute.to_mrc(), self.starting_value.to_mrc(), end_of_effort.to_mrc(), self.ending_value.to_mrc()
             },
             end_of_effort,
         )
@@ -155,7 +155,7 @@ mod tests {
         use super::Effort;
         use crate::testing::serialize_deserialize;
         use crate::workout_data::positive_float::PositiveFloat;
-        use crate::workout_data::workout::{efforts_to_crm, extract_initial_starting_minutes};
+        use crate::workout_data::workout::{efforts_to_mrc, extract_initial_starting_minutes};
 
         #[test]
         fn construct() {
@@ -167,7 +167,7 @@ mod tests {
         }
 
         #[test]
-        fn effort_crm() {
+        fn effort_mrc() {
             assert_eq!(
                 Effort::new(
                     PositiveFloat::new(60.0).expect("A positive duration can be created."),
@@ -175,19 +175,19 @@ mod tests {
                     None,
                 )
                 .starting_value
-                .to_crm(),
+                .to_mrc(),
                 "100.00"
             )
         }
         #[test]
-        fn to_crm() {
+        fn to_mrc() {
             assert_eq!(
                 Effort::new(
                     PositiveFloat::new(5.0).unwrap(),
                     PositiveFloat::new(100.0).unwrap(),
                     None,
                 )
-                .to_crm(PositiveFloat::new(5.0).unwrap()),
+                .to_mrc(PositiveFloat::new(5.0).unwrap()),
                 (
                     String::from(
                         "5.00	100.00\n\
@@ -224,9 +224,9 @@ mod tests {
         }
 
         #[test]
-        fn test_efforts_to_crm() {
+        fn test_efforts_to_mrc() {
             assert_eq!(
-                efforts_to_crm(
+                efforts_to_mrc(
                     &vec![
                         Effort::new(
                             PositiveFloat::new(5.0).unwrap(),

@@ -1,5 +1,5 @@
 use super::app::{EffortMessage, WorkoutDesignerMessage};
-use crate::gui::crm_creator::WorkoutMessage;
+use crate::gui::mrc_creator::WorkoutMessage;
 use crate::workout_data::positive_float::{InvalidPositiveFloatError, PositiveFloat};
 use crate::workout_data::{effort, workout};
 use iced::{
@@ -242,9 +242,9 @@ impl<'a> effort::Effort {
                 .push(
                     Row::new()
                         .spacing(10)
-                        .push(WhiteText::new(self.duration_in_minutes.to_crm()))
-                        .push(WhiteText::new(self.starting_value.to_crm()))
-                        .push(WhiteText::new(self.ending_value.to_crm())),
+                        .push(WhiteText::new(self.duration_in_minutes.to_mrc()))
+                        .push(WhiteText::new(self.starting_value.to_mrc()))
+                        .push(WhiteText::new(self.ending_value.to_mrc())),
                 )
                 .push(Button::new(delete_button, Text::new("Delete")).on_press(
                     WorkoutMessage::Design(WorkoutDesignerMessage::Effort(

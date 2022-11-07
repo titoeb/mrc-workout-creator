@@ -34,8 +34,8 @@ impl PositiveFloat {
         }
         Err(InvalidPositiveFloatError::ProvidedNonPositiveNumber { number: float })
     }
-    /// Convert the positive float to a number that can be displayed in the crm-file.
-    pub fn to_crm(&self) -> String {
+    /// Convert the positive float to a number that can be displayed in the mrc-file.
+    pub fn to_mrc(&self) -> String {
         format!("{:.2}", self.float)
     }
     /// Extract the floating point number from the float
@@ -71,7 +71,7 @@ impl Add for PositiveFloat {
 
 impl From<PositiveFloat> for String {
     fn from(positive_float: PositiveFloat) -> Self {
-        positive_float.to_crm()
+        positive_float.to_mrc()
     }
 }
 
@@ -98,11 +98,11 @@ mod test {
     }
 
     #[test]
-    fn crm_format() {
+    fn mrc_format() {
         assert_eq!(
             PositiveFloat::new(10.0)
                 .expect("A positive positive floating-point can be created")
-                .to_crm(),
+                .to_mrc(),
             "10.00"
         )
     }

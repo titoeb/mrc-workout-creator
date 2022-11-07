@@ -1,5 +1,5 @@
 use crate::workout_data::workout;
-use crate::{gui::crm_creator::WorkoutMessage, workout_data::effort};
+use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::{canvas, Color, Element, Length, Point, Rectangle, Size};
 #[derive(Default)]
 pub struct Visualizer {

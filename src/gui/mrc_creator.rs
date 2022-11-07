@@ -6,14 +6,14 @@ use rfd::FileDialog;
 use std::fs;
 
 /// Holding the state of the overall CRMCreator Application.
-pub enum CRMCreator {
+pub enum MRCCreator {
     WorkoutDefinition(WorkoutDefiner),
     WorkoutDesign(WorkoutDesigner),
 }
 
-impl Default for CRMCreator {
+impl Default for MRCCreator {
     fn default() -> Self {
-        CRMCreator::WorkoutDefinition(WorkoutDefiner::default())
+        MRCCreator::WorkoutDefinition(WorkoutDefiner::default())
     }
 }
 
@@ -35,7 +35,7 @@ impl From<WorkoutDesignerMessage> for WorkoutMessage {
     }
 }
 
-impl Sandbox for CRMCreator {
+impl Sandbox for MRCCreator {
     type Message = WorkoutMessage;
 
     fn new() -> Self {
@@ -60,8 +60,8 @@ impl Sandbox for CRMCreator {
 
     fn view(&mut self) -> Element<WorkoutMessage> {
         match self {
-            CRMCreator::WorkoutDefinition(workout_definition) => workout_definition.view(),
-            CRMCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
+            MRCCreator::WorkoutDefinition(workout_definition) => workout_definition.view(),
+            MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
         }
     }
 
@@ -70,12 +70,12 @@ impl Sandbox for CRMCreator {
     }
 }
 
-impl CRMCreator {
+impl MRCCreator {
     fn switch_to_workout_design(&mut self) {
-        if let CRMCreator::WorkoutDefinition(workout_definition) = self {
+        if let MRCCreator::WorkoutDefinition(workout_definition) = self {
             match workout_definition.get_selected_workout_type() {
                 Some(workout_type) => {
-                    *self = CRMCreator::WorkoutDesign(WorkoutDesigner::new(
+                    *self = MRCCreator::WorkoutDesign(WorkoutDesigner::new(
                         workout_definition.get_workout_name(),
                         workout_definition.get_workout_description(),
                         workout_type,
@@ -97,7 +97,7 @@ impl CRMCreator {
                 if let Ok(loaded_workout) =
                     serde_json::from_reader::<fs::File, workout::Workout>(json_to_load)
                 {
-                    *self = CRMCreator::WorkoutDesign(WorkoutDesigner::from(loaded_workout));
+                    *self = MRCCreator::WorkoutDesign(WorkoutDesigner::from(loaded_workout));
                 } else {
                     eprintln!("Invalid Json file.")
                 }
@@ -107,12 +107,12 @@ impl CRMCreator {
 
     fn handle_subpage_messages(&mut self, message: WorkoutMessage) {
         match self {
-            CRMCreator::WorkoutDefinition(workout_definer) => {
+            MRCCreator::WorkoutDefinition(workout_definer) => {
                 if let WorkoutMessage::Definition(definition_message) = message {
                     workout_definer.update(definition_message)
                 }
             }
-            CRMCreator::WorkoutDesign(workout_designer) => {
+            MRCCreator::WorkoutDesign(workout_designer) => {
                 if let WorkoutMessage::Design(design_message) = message {
                     workout_designer.update(design_message)
                 }
