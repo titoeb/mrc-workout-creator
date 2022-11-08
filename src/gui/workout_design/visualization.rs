@@ -23,9 +23,9 @@ impl canvas::Program<WorkoutMessage> for Visualizer {
             let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
             frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
 
-            for rectangle in &draw_efforts(&bounds, &self.workout.efforts) {
-                let drawn_rectangle = rectangle.draw();
-                frame.fill(&drawn_rectangle, Color::from_rgb8(255, 255, 255));
+            for shapes in &draw_efforts(&bounds, &self.workout.efforts) {
+                let drawn_shape = shapes.draw();
+                frame.fill(&drawn_shape, Color::from_rgb8(255, 255, 255));
             }
         });
 
@@ -33,15 +33,18 @@ impl canvas::Program<WorkoutMessage> for Visualizer {
     }
 }
 
-fn draw_efforts(bounds: &Rectangle, efforts: &[effort::Effort]) -> Vec<RectangleToDraw> {
+fn draw_efforts<'a>(bounds: &'a Rectangle, efforts: &[effort::Effort]) -> Vec<Box<dyn Drawable>> {
     let durations = efforts
         .iter()
         .map(|effort| effort.duration_in_minutes.to_float() as f32)
         .collect();
-
-    let efforts = efforts
+    let starting_values: Vec<f32> = efforts
         .iter()
         .map(|effort| effort.starting_value.to_float() as f32)
+        .collect();
+    let ending_values: Vec<f32> = efforts
+        .iter()
+        .map(|effort| effort.ending_value.to_float() as f32)
         .collect();
 
     let offset_between_durations = 1.0;
@@ -49,13 +52,41 @@ fn draw_efforts(bounds: &Rectangle, efforts: &[effort::Effort]) -> Vec<Rectangle
     compute_starting_dimensions_x(bounds.size().width, durations, offset_between_durations)
         .into_iter()
         .zip(
-            compute_starting_dimensions_y(bounds.size().height, efforts, offset_between_durations)
-                .into_iter(),
+            compute_starting_dimensions_y(
+                bounds.size().height,
+                starting_values.clone(),
+                offset_between_durations,
+                starting_values.iter().chain(ending_values.iter()).copied().fold(f32::NAN, f32::max)
+            )
+            .into_iter(),
         )
-        .map(|(x_dimensions, y_dimensions)| {
-            RectangleToDraw::new(x_dimensions, y_dimensions, bounds.size())
-        })
-        .collect::<Vec<RectangleToDraw>>()
+        .zip(
+            compute_starting_dimensions_y(
+                bounds.size().height,
+                ending_values.clone(),
+                offset_between_durations,
+                starting_values.iter().chain(ending_values.iter()).copied().fold(f32::NAN, f32::max)
+            )
+            .into_iter(),
+        )
+        .flat_map(
+            |((x_dimensions, y_dimensions_starting), y_dimensions_ending)| -> Vec<Box<dyn Drawable+'static>>{
+                vec![
+                    Box::new(RectangleToDraw::new(
+                        x_dimensions,
+                        if y_dimensions_ending.height > y_dimensions_starting.height {y_dimensions_starting} else {y_dimensions_ending},
+                        bounds.size(),
+                    )),
+                    Box::new(TriangleToDraw::new(
+                        x_dimensions,
+                        y_dimensions_starting,
+                        y_dimensions_ending,
+                        bounds.size(),
+                    )),
+                ]
+            },
+        )
+        .collect::<Vec<Box<dyn Drawable>>>()
 }
 
 fn compute_starting_dimensions_x(
@@ -109,9 +140,9 @@ fn compute_starting_dimensions_y(
     length_of_frame: f32,
     efforts: Vec<f32>,
     offset_between_efforts: f32,
+    max: f32,
 ) -> Vec<RectangleYDimensions> {
-    let ratio_effort_to_frame = ((length_of_frame * 0.95) - offset_between_efforts)
-        / efforts.iter().copied().fold(f32::NAN, f32::max);
+    let ratio_effort_to_frame = ((length_of_frame * 0.95) - offset_between_efforts) / max;
     let heigths = efforts
         .iter()
         .map(|&current_effort| current_effort * ratio_effort_to_frame);
@@ -124,7 +155,7 @@ fn compute_starting_dimensions_y(
         .collect()
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Copy)]
 struct RectangleXDimensions {
     starting_point: f32,
     width: f32,
@@ -139,7 +170,7 @@ impl RectangleXDimensions {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Copy)]
 struct RectangleYDimensions {
     starting_point: f32,
     height: f32,
@@ -154,6 +185,9 @@ impl RectangleYDimensions {
     }
 }
 
+trait Drawable {
+    fn draw(&self) -> canvas::Path;
+}
 #[derive(Clone, Debug, PartialEq)]
 struct RectangleToDraw {
     top_left: Point,
@@ -174,8 +208,93 @@ impl RectangleToDraw {
             size: Size::new(dimensions_x.width, dimensions_y.height),
         }
     }
+}
+
+impl Drawable for RectangleToDraw {
     fn draw(&self) -> canvas::Path {
         canvas::Path::rectangle(self.top_left, self.size)
+    }
+}
+
+struct TriangleToDraw {
+    point_1: Point,
+    point_2: Point,
+    point_3: Point,
+}
+
+impl TriangleToDraw {
+    fn new(
+        x_dimensions: RectangleXDimensions,
+        y_dimensions_starting: RectangleYDimensions,
+        y_dimensions_ending: RectangleYDimensions,
+        frame: Size,
+    ) -> Self {
+        if y_dimensions_starting.height > y_dimensions_ending.height {
+            Self {
+                point_1: Point::new(
+                    x_dimensions.starting_point,
+                    mirror_y(
+                        y_dimensions_ending.starting_point + y_dimensions_ending.height,
+                        frame,
+                    ),
+                ),
+                point_2: Point::new(
+                    x_dimensions.starting_point,
+                    mirror_y(
+                        y_dimensions_starting.starting_point + y_dimensions_starting.height,
+                        frame,
+                    ),
+                ),
+
+                point_3: Point::new(
+                    x_dimensions.starting_point + x_dimensions.width,
+                    mirror_y(
+                        y_dimensions_ending.starting_point + y_dimensions_ending.height,
+                        frame,
+                    ),
+                ),
+            }
+        } else {
+            Self {
+                point_1: Point::new(
+                    x_dimensions.starting_point,
+                    mirror_y(
+                        y_dimensions_starting.starting_point + y_dimensions_starting.height,
+                        frame,
+                    ),
+                ),
+                point_2: Point::new(
+                    x_dimensions.starting_point + x_dimensions.width,
+                    mirror_y(
+                        y_dimensions_starting.starting_point + y_dimensions_starting.height,
+                        frame,
+                    ),
+                ),
+                point_3: Point::new(
+                    x_dimensions.starting_point + x_dimensions.width,
+                    mirror_y(
+                        y_dimensions_ending.starting_point + y_dimensions_ending.height,
+                        frame,
+                    ),
+                ),
+            }
+        }
+    }
+}
+
+fn mirror_y(point: f32, frame: Size) -> f32 {
+    frame.height - point
+}
+
+impl Drawable for TriangleToDraw {
+    fn draw(&self) -> canvas::Path {
+        canvas::Path::new(|p| {
+            p.move_to(self.point_1);
+            p.line_to(self.point_2);
+            p.line_to(self.point_3);
+            p.line_to(self.point_1);
+            p.close();
+        })
     }
 }
 
@@ -218,7 +337,7 @@ mod test {
     #[test]
     fn test_get_starting_coordinates_y() {
         assert_eq!(
-            compute_starting_dimensions_y(100.0, vec![100.0, 200.0, 250.0, 100.0], 0.1),
+            compute_starting_dimensions_y(100.0, vec![100.0, 200.0, 250.0, 100.0], 0.1, 250.0),
             vec![
                 RectangleYDimensions::new(0.1, 37.960003),
                 RectangleYDimensions::new(0.1, 75.920006),
