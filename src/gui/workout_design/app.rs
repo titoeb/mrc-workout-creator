@@ -6,7 +6,7 @@ use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
 use iced::{button, scrollable, Alignment, Column, Container, Element, Length, Row, Text};
 use rfd::FileDialog;
-use std::fs::{File, OpenOptions};
+use std::fs::{remove_file, File, OpenOptions};
 use std::io::Write;
 use std::path;
 pub struct WorkoutDesigner {
@@ -190,6 +190,9 @@ impl WorkoutDesigner {
 }
 
 fn open_or_create(path_to_file: &path::PathBuf) -> Option<File> {
+    if path_to_file.exists() {
+        let _ = remove_file(path_to_file);
+    }
     OpenOptions::new()
         .read(true)
         .write(true)
