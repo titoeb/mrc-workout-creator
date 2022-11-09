@@ -128,7 +128,7 @@ where
     Settings {
         id: None,
         window: window::Settings {
-            size: (512, 512),
+            size: (1024, 512),
             position: window::Position::default(),
             min_size: None,
             max_size: None,
