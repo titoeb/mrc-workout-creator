@@ -99,6 +99,19 @@ impl Workout {
             },
         )
     }
+    pub fn workout_duration(&self) -> f64 {
+        self.total_time_of_workout().to_float()
+    }
+    pub fn average_intensity(&self) -> f64 {
+        let workout_duration = self.workout_duration();
+        self.efforts
+            .iter()
+            .map(|effort| {
+                (effort.duration_in_minutes.to_float() / workout_duration)
+                    * ((effort.starting_value.to_float() + effort.ending_value.to_float()) / 2.0)
+            })
+            .sum()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Copy)]
@@ -322,6 +335,58 @@ mod test {
                 workout_to_count.total_time_of_workout(),
                 PositiveFloat::new(20.0).unwrap()
             )
+        }
+        #[test]
+        fn workout_duration() {
+            let workout = Workout::new(
+                "test_workout",
+                "test-1",
+                vec![
+                    Effort::new(
+                        PositiveFloat::new(5.0).unwrap(),
+                        PositiveFloat::new(80.0).unwrap(),
+                        None,
+                    ),
+                    Effort::new(
+                        PositiveFloat::new(15.0).unwrap(),
+                        PositiveFloat::new(200.0).unwrap(),
+                        None,
+                    ),
+                    Effort::new(
+                        PositiveFloat::new(2.0).unwrap(),
+                        PositiveFloat::new(200.0).unwrap(),
+                        None,
+                    ),
+                ],
+                WorkoutType::Watts,
+            );
+            assert_eq!(workout.workout_duration(), 22.0);
+        }
+        #[test]
+        fn average_intensity() {
+            let workout = Workout::new(
+                "test_workout",
+                "test-1",
+                vec![
+                    Effort::new(
+                        PositiveFloat::new(5.0).unwrap(),
+                        PositiveFloat::new(100.0).unwrap(),
+                        None,
+                    ),
+                    Effort::new(
+                        PositiveFloat::new(15.0).unwrap(),
+                        PositiveFloat::new(200.0).unwrap(),
+                        None,
+                    ),
+                    Effort::new(
+                        PositiveFloat::new(5.0).unwrap(),
+                        PositiveFloat::new(300.0).unwrap(),
+                        None,
+                    ),
+                ],
+                WorkoutType::Watts,
+            );
+            assert_eq!(workout.average_intensity(), 200.0);
         }
     }
 }
