@@ -210,6 +210,8 @@ impl<'a> workout::Workout {
         &'a mut self,
         scrollable_effort: &'a mut scrollable::State,
     ) -> impl Into<Element<'a, WorkoutMessage>> {
+        let workout_duration = self.workout_duration();
+        let average_intensity = self.average_intensity();
         container::Container::new(
             Column::new()
                 .spacing(20)
@@ -225,7 +227,14 @@ impl<'a> workout::Workout {
                             scrollable.push(effort.view(effort_index))
                         },
                     ),
-                ),
+                )
+                .push(WhiteText::new(
+                    format!("Duration: {:.1}", workout_duration,),
+                ))
+                .push(WhiteText::new(format!(
+                    "Average Intensity: {:.1}",
+                    average_intensity,
+                ))),
         )
         .style(WorkoutSectionDesign {})
     }
