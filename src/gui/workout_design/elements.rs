@@ -1,6 +1,8 @@
+use std::num::ParseFloatError;
+
 use super::app::{EffortMessage, WorkoutDesignerMessage};
 use crate::gui::mrc_creator::WorkoutMessage;
-use crate::workout_data::positive_float::{InvalidPositiveFloatError, PositiveFloat};
+use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
 use iced::{
     container, scrollable, text_input, Alignment, Button, Color, Column, Element, Row, Text,
@@ -170,15 +172,15 @@ impl Default for DurationInput {
 }
 
 impl TryFrom<EffortUnitInput> for effort::Effort {
-    type Error = InvalidPositiveFloatError;
+    type Error = ParseFloatError;
     fn try_from(effort_unit_input: EffortUnitInput) -> Result<Self, Self::Error> {
         Ok(effort::Effort::new(
-            PositiveFloat::try_from(effort_unit_input.current_duration())?,
-            PositiveFloat::try_from(effort_unit_input.starting_value())?,
+            effort_unit_input.current_duration().parse()?,
+            effort_unit_input.starting_value().parse()?,
             if effort_unit_input.ending_value().is_empty() {
                 None
             } else {
-                Some(PositiveFloat::try_from(effort_unit_input.ending_value())?)
+                Some(effort_unit_input.ending_value().parse()?)
             },
         ))
     }

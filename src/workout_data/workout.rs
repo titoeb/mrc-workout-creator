@@ -1,7 +1,5 @@
 use crate::workout_data::effort::Effort;
-use crate::workout_data::positive_float::PositiveFloat;
 use serde::{Deserialize, Serialize};
-use std::ops::Add;
 /// A planed workout.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct Workout {
@@ -62,7 +60,7 @@ impl Workout {
     }
     fn mrc_body_workouts(&self) -> String {
         let mut efforts_as_mrc = Vec::new();
-        let mut current_starting_minute = PositiveFloat::new(0.0).unwrap();
+        let mut current_starting_minute = 0.0;
 
         for effort in &self.efforts {
             let (effort_as_mrc, new_starting_minute) = effort.to_mrc(current_starting_minute);
@@ -91,24 +89,23 @@ impl Workout {
     pub fn update_duration_of_effort(&mut self, index: usize, updated_duration_in_minutes: String) {
         self.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
     }
-    pub fn total_time_of_workout(&self) -> PositiveFloat {
-        self.efforts.iter().fold(
-            PositiveFloat::new(0.0).expect("0.0 is a valid positive float."),
-            |total_minutes, current_effort_length| {
-                total_minutes.add(current_effort_length.duration_in_minutes.clone())
-            },
-        )
+    pub fn total_time_of_workout(&self) -> f64 {
+        self.efforts
+            .iter()
+            .fold(0.0, |total_minutes, current_effort_length| {
+                total_minutes + current_effort_length.duration_in_minutes
+            })
     }
     pub fn workout_duration(&self) -> f64 {
-        self.total_time_of_workout().to_float()
+        self.total_time_of_workout()
     }
     pub fn average_intensity(&self) -> f64 {
         let workout_duration = self.workout_duration();
         self.efforts
             .iter()
             .map(|effort| {
-                (effort.duration_in_minutes.to_float() / workout_duration)
-                    * ((effort.starting_value.to_float() + effort.ending_value.to_float()) / 2.0)
+                (effort.duration_in_minutes / workout_duration)
+                    * ((effort.starting_value + effort.ending_value) / 2.0)
             })
             .sum()
     }
@@ -129,16 +126,13 @@ impl WorkoutType {
     }
 }
 
-pub fn efforts_to_mrc(
-    efforts: &Vec<Effort>,
-    starting_minute: &PositiveFloat,
-) -> (String, PositiveFloat) {
+pub fn efforts_to_mrc(efforts: &Vec<Effort>, starting_minute: f64) -> (String, f64) {
     let starting_minutes = extract_initial_starting_minutes(efforts, starting_minute);
     let effort_string_with_final_minute = efforts
         .iter()
         .zip(starting_minutes.into_iter())
         .map(|(effort, starting_minute)| effort.to_mrc(starting_minute))
-        .collect::<Vec<(String, PositiveFloat)>>();
+        .collect::<Vec<(String, f64)>>();
 
     (
         effort_string_with_final_minute
@@ -148,22 +142,18 @@ pub fn efforts_to_mrc(
             .join("\n"),
         effort_string_with_final_minute
             .last()
-            .unwrap_or(&(String::from(""), starting_minute.clone()))
-            .1
-            .clone(),
+            .unwrap_or(&(String::from(""), starting_minute))
+            .1,
     )
 }
 
-pub fn extract_initial_starting_minutes(
-    efforts: &Vec<Effort>,
-    starting_minute: &PositiveFloat,
-) -> Vec<PositiveFloat> {
+pub fn extract_initial_starting_minutes(efforts: &Vec<Effort>, starting_minute: f64) -> Vec<f64> {
     let mut starting_times = Vec::new();
-    let mut current_starting_time = starting_minute.clone();
+    let mut current_starting_time = starting_minute;
 
     for effort in efforts {
-        starting_times.push(current_starting_time.clone());
-        current_starting_time = current_starting_time + effort.duration_in_minutes.clone();
+        starting_times.push(current_starting_time);
+        current_starting_time += effort.duration_in_minutes;
     }
 
     starting_times
@@ -174,7 +164,6 @@ mod test {
     mod workout {
         use super::super::{Effort, Workout, WorkoutType};
         use crate::testing::serialize_deserialize;
-        use crate::workout_data::positive_float::PositiveFloat;
 
         #[test]
         fn construct_workout() {
@@ -182,21 +171,9 @@ mod test {
                 "test_workout",
                 "Workout for testing",
                 vec![
-                    Effort::new(
-                        PositiveFloat::new(300.0).unwrap(),
-                        PositiveFloat::new(100.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(300.0).unwrap(),
-                        PositiveFloat::new(100.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(60.0).unwrap(),
-                        PositiveFloat::new(150.0).unwrap(),
-                        None,
-                    ),
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(60.0, 150.0, None),
                 ],
                 WorkoutType::Watts,
             );
@@ -227,16 +204,8 @@ mod test {
                     "test_workout",
                     "test-1",
                     vec![
-                        Effort::new(
-                            PositiveFloat::new(5.0).unwrap(),
-                            PositiveFloat::new(80.0).unwrap(),
-                            None,
-                        ),
-                        Effort::new(
-                            PositiveFloat::new(10.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap(),
-                            None,
-                        ),
+                        Effort::new(5.0, 80.0, None,),
+                        Effort::new(10.0, 100.0, None,),
                     ],
                     WorkoutType::Watts,
                 )
@@ -258,18 +227,7 @@ mod test {
             let workout_to_test_serialization = Workout::new(
                 "test_workout",
                 "test-1",
-                vec![
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(10.0).unwrap(),
-                        PositiveFloat::new(100.0).unwrap(),
-                        None,
-                    ),
-                ],
+                vec![Effort::new(5.0, 80.0, None), Effort::new(10.0, 100.0, None)],
                 WorkoutType::Watts,
             );
             assert_eq!(
@@ -282,33 +240,17 @@ mod test {
             let mut workout_to_add_effort = Workout::new(
                 "test_workout",
                 "test-1",
-                vec![Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(80.0).unwrap(),
-                    None,
-                )],
+                vec![Effort::new(5.0, 80.0, None)],
                 WorkoutType::Watts,
             );
 
-            workout_to_add_effort.add_effort(Effort::new(
-                PositiveFloat::new(10.0).unwrap(),
-                PositiveFloat::new(80.0).unwrap(),
-                None,
-            ));
+            workout_to_add_effort.add_effort(Effort::new(10.0, 80.0, None));
 
             assert_eq!(
                 workout_to_add_effort.efforts,
                 vec![
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(10.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap(),
-                        None,
-                    ),
+                    Effort::new(5.0, 80.0, None,),
+                    Effort::new(10.0, 80.0, None,),
                 ],
             )
         }
@@ -317,24 +259,10 @@ mod test {
             let workout_to_count = Workout::new(
                 "test_workout",
                 "test-1",
-                vec![
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(15.0).unwrap(),
-                        PositiveFloat::new(200.0).unwrap(),
-                        None,
-                    ),
-                ],
+                vec![Effort::new(5.0, 80.0, None), Effort::new(15.0, 200.0, None)],
                 WorkoutType::Watts,
             );
-            assert_eq!(
-                workout_to_count.total_time_of_workout(),
-                PositiveFloat::new(20.0).unwrap()
-            )
+            assert_eq!(workout_to_count.total_time_of_workout(), 20.0)
         }
         #[test]
         fn workout_duration() {
@@ -342,21 +270,9 @@ mod test {
                 "test_workout",
                 "test-1",
                 vec![
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(80.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(15.0).unwrap(),
-                        PositiveFloat::new(200.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(2.0).unwrap(),
-                        PositiveFloat::new(200.0).unwrap(),
-                        None,
-                    ),
+                    Effort::new(5.0, 80.0, None),
+                    Effort::new(15.0, 200.0, None),
+                    Effort::new(2.0, 200.0, None),
                 ],
                 WorkoutType::Watts,
             );
@@ -368,21 +284,9 @@ mod test {
                 "test_workout",
                 "test-1",
                 vec![
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(100.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(15.0).unwrap(),
-                        PositiveFloat::new(200.0).unwrap(),
-                        None,
-                    ),
-                    Effort::new(
-                        PositiveFloat::new(5.0).unwrap(),
-                        PositiveFloat::new(300.0).unwrap(),
-                        None,
-                    ),
+                    Effort::new(5.0, 100.0, None),
+                    Effort::new(15.0, 200.0, None),
+                    Effort::new(5.0, 300.0, None),
                 ],
                 WorkoutType::Watts,
             );

@@ -1,4 +1,3 @@
-use mrc_workout_creator::workout_data::positive_float::PositiveFloat;
 use mrc_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
 
 #[test]
@@ -8,16 +7,8 @@ fn simple_percent_of_ftp_workout_to_mrc() {
             "test_workout",
             "test-1",
             vec![
-                Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(80.0).unwrap(),
-                    None,
-                ),
-                Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap(),
-                    None,
-                ),
+                Effort::new(5.0, 80.0, None,),
+                Effort::new(5.0, 100.0, None,),
             ],
             WorkoutType::PercentOfFTP
         )
@@ -42,16 +33,8 @@ fn simple_watt_workout_to_mrc() {
             "test_workout",
             "test-1",
             vec![
-                Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(80.0).unwrap(),
-                    None,
-                ),
-                Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap(),
-                    None,
-                ),
+                Effort::new(5.0, 80.0, None,),
+                Effort::new(5.0, 100.0, None,),
             ],
             WorkoutType::Watts
         )
