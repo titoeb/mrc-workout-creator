@@ -1,4 +1,4 @@
-use crate::workout_data::positive_float::PositiveFloat;
+use crate::workout_data::ToMRC;
 use iced::{button, text_input};
 use serde::{Deserialize, Serialize};
 
@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 /// for which it should be executed.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Effort {
-    pub(crate) duration_in_minutes: PositiveFloat,
-    pub(crate) starting_value: PositiveFloat,
-    pub(crate) ending_value: PositiveFloat,
+    pub(crate) duration_in_minutes: f64,
+    pub(crate) starting_value: f64,
+    pub(crate) ending_value: f64,
 
     #[serde(skip)]
     pub gui_state: EffortState,
@@ -47,20 +47,16 @@ impl Default for EffortState {
 
 impl Effort {
     /// Creating a new Effort unit.
-    pub fn new(
-        duration_in_minutes: PositiveFloat,
-        starting_value: PositiveFloat,
-        ending_value: Option<PositiveFloat>,
-    ) -> Self {
+    pub fn new(duration_in_minutes: f64, starting_value: f64, ending_value: Option<f64>) -> Self {
         Self {
             duration_in_minutes,
-            starting_value: starting_value.clone(),
+            starting_value,
             ending_value: ending_value.unwrap_or(starting_value),
             gui_state: EffortState::default(),
         }
     }
-    pub fn to_mrc(&self, starting_minute: PositiveFloat) -> (String, PositiveFloat) {
-        let end_of_effort = starting_minute.clone() + self.duration_in_minutes.clone();
+    pub fn to_mrc(&self, starting_minute: f64) -> (String, f64) {
+        let end_of_effort = starting_minute + self.duration_in_minutes;
         (
             format! {
                 "{}\t{}\n\
@@ -73,11 +69,11 @@ impl Effort {
     pub fn to_edit(&mut self) {
         self.gui_state = EffortState::Editing {
             starting_value_state: text_input::State::default(),
-            starting_value: String::from(self.starting_value.clone()),
+            starting_value: self.starting_value.to_mrc(),
             ending_value_state: text_input::State::default(),
-            ending_value: String::from(self.ending_value.clone()),
+            ending_value: self.ending_value.to_mrc(),
             duration_in_minutes_state: text_input::State::default(),
-            duration_in_minutes: String::from(self.duration_in_minutes.clone()),
+            duration_in_minutes: self.duration_in_minutes.to_mrc(),
         }
     }
     pub fn to_idle(&mut self) {
@@ -94,14 +90,17 @@ impl Effort {
                 None
             } else {
                 Some(
-                    PositiveFloat::try_from(ending_value)
+                    ending_value
+                        .parse()
                         .expect("Please provide a valid positive float."),
                 )
             };
             *self = Effort::new(
-                PositiveFloat::try_from(duration_in_minutes)
+                duration_in_minutes
+                    .parse()
                     .expect("Please provide a valid positive float."),
-                PositiveFloat::try_from(starting_value)
+                starting_value
+                    .parse()
                     .expect("Please provide a valid positive float."),
                 new_ending_value,
             );
@@ -154,46 +153,31 @@ mod tests {
     mod effort_unit {
         use super::Effort;
         use crate::testing::serialize_deserialize;
-        use crate::workout_data::positive_float::PositiveFloat;
         use crate::workout_data::workout::{efforts_to_mrc, extract_initial_starting_minutes};
+        use crate::workout_data::ToMRC;
 
         #[test]
         fn construct() {
-            let _ = Effort::new(
-                PositiveFloat::new(60.0).unwrap(),
-                PositiveFloat::new(150.0).unwrap(),
-                None,
-            );
+            let _ = Effort::new(60.0, 150.0, None);
         }
 
         #[test]
         fn effort_mrc() {
             assert_eq!(
-                Effort::new(
-                    PositiveFloat::new(60.0).expect("A positive duration can be created."),
-                    PositiveFloat::new(100.0).unwrap(),
-                    None,
-                )
-                .starting_value
-                .to_mrc(),
+                Effort::new(60.0, 100.0, None,).starting_value.to_mrc(),
                 "100.00"
             )
         }
         #[test]
         fn to_mrc() {
             assert_eq!(
-                Effort::new(
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(100.0).unwrap(),
-                    None,
-                )
-                .to_mrc(PositiveFloat::new(5.0).unwrap()),
+                Effort::new(5.0, 100.0, None,).to_mrc(5.0),
                 (
                     String::from(
                         "5.00	100.00\n\
                 10.00	100.00"
                     ),
-                    PositiveFloat::new(10.0).unwrap()
+                    10.0
                 )
             )
         }
@@ -202,24 +186,10 @@ mod tests {
         fn test_extract_starting_minutes_from_efforts() {
             assert_eq!(
                 extract_initial_starting_minutes(
-                    &vec![
-                        Effort::new(
-                            PositiveFloat::new(7.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap(),
-                            None
-                        ),
-                        Effort::new(
-                            PositiveFloat::new(9.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap(),
-                            None
-                        )
-                    ],
-                    &PositiveFloat::new(5.0).unwrap()
+                    &vec![Effort::new(7.0, 100.0, None), Effort::new(9.0, 100.0, None)],
+                    5.0
                 ),
-                vec![
-                    PositiveFloat::new(5.0).unwrap(),
-                    PositiveFloat::new(12.0).unwrap()
-                ]
+                vec![5.0, 12.0]
             )
         }
 
@@ -228,28 +198,12 @@ mod tests {
             assert_eq!(
                 efforts_to_mrc(
                     &vec![
-                        Effort::new(
-                            PositiveFloat::new(5.0).unwrap(),
-                            PositiveFloat::new(100.0).unwrap(),
-                            None
-                        ),
-                        Effort::new(
-                            PositiveFloat::new(10.0).unwrap(),
-                            PositiveFloat::new(150.0).unwrap(),
-                            None
-                        ),
-                        Effort::new(
-                            PositiveFloat::new(15.0).unwrap(),
-                            PositiveFloat::new(200.0).unwrap(),
-                            None
-                        ),
-                        Effort::new(
-                            PositiveFloat::new(5.0).unwrap(),
-                            PositiveFloat::new(120.0).unwrap(),
-                            None
-                        ),
+                        Effort::new(5.0, 100.0, None),
+                        Effort::new(10.0, 150.0, None),
+                        Effort::new(15.0, 200.0, None),
+                        Effort::new(5.0, 120.0, None),
                     ],
-                    &PositiveFloat::new(5.0).unwrap()
+                    5.0
                 ),
                 (
                     String::from(
@@ -262,18 +216,14 @@ mod tests {
                 35.00\t120.00\n\
                 40.00\t120.00"
                     ),
-                    PositiveFloat::new(40.0).unwrap()
+                    40.0
                 )
             )
         }
 
         #[test]
         fn test_serialization() {
-            let effort_unit_to_serialize = Effort::new(
-                PositiveFloat::new(60.0).expect("A positive duration can be created."),
-                PositiveFloat::new(100.0).unwrap(),
-                None,
-            );
+            let effort_unit_to_serialize = Effort::new(60.0, 100.0, None);
 
             assert_eq!(
                 effort_unit_to_serialize,

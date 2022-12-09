@@ -36,15 +36,15 @@ impl canvas::Program<WorkoutMessage> for Visualizer {
 fn draw_efforts<'a>(bounds: &'a Rectangle, efforts: &[effort::Effort]) -> Vec<Box<dyn Drawable>> {
     let durations = efforts
         .iter()
-        .map(|effort| effort.duration_in_minutes.to_float() as f32)
+        .map(|effort| effort.duration_in_minutes as f32)
         .collect();
     let starting_values: Vec<f32> = efforts
         .iter()
-        .map(|effort| effort.starting_value.to_float() as f32)
+        .map(|effort| effort.starting_value as f32)
         .collect();
     let ending_values: Vec<f32> = efforts
         .iter()
-        .map(|effort| effort.ending_value.to_float() as f32)
+        .map(|effort| effort.ending_value as f32)
         .collect();
 
     let offset_between_durations = 1.0;
