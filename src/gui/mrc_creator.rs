@@ -1,7 +1,7 @@
 use crate::gui::workout_definition::app::{WorkoutDefiner, WorkoutDefinerMessage};
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
 use crate::workout_data::workout;
-use iced::{window, Element, Sandbox, Settings};
+use iced::{window, Element, Sandbox, Settings, Theme};
 use rfd::FileDialog;
 use std::fs;
 
@@ -64,7 +64,9 @@ impl Sandbox for MRCCreator {
             MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
         }
     }
-    // TODO: Make Backround color to `rgb8(24, 24, 24)` maybe via scheme?
+    fn theme(&self) -> Theme {
+        Theme::Dark
+    }
 }
 
 impl MRCCreator {
