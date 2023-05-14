@@ -116,5 +116,5 @@ jobs:
       
       - name:  Setup gitlint and executed check.
         run: |
-          pip install gitlint-core==0.17.0
+          pip install gitlint-core==0.19.1
           gitlint --config .gitlint-configuration --commits "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
