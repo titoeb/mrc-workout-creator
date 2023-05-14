@@ -2,20 +2,24 @@ use crate::workout_data::workout;
 use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::widget::canvas;
 use iced::{Color, Element, Length, Point, Rectangle, Size, Theme};
+use std::cell::RefCell;
 #[derive(Default)]
 pub struct Visualizer {
     cache: canvas::Cache,
-    workout: workout::Workout,
+    workout: RefCell<workout::Workout>,
 }
 
 impl Visualizer {
-    pub fn view(&self, _workout: workout::Workout) -> impl Into<Element<'_, WorkoutMessage>> {
-        // TODO: How to do this now?
-        // self.workout=workout
+    pub fn view(&self, workout: workout::Workout) -> impl Into<Element<'_, WorkoutMessage>> {
+        self.overwrite_workout(workout);
         self.cache.clear();
         canvas::Canvas::new(self)
             .width(Length::Fill)
             .height(Length::Fill)
+    }
+    fn overwrite_workout(&self, new_workout: workout::Workout) {
+        let mut workout = self.workout.borrow_mut();
+        *workout = new_workout;
     }
 }
 
@@ -32,7 +36,7 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
             let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
             frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
 
-            for shapes in &draw_efforts(&bounds, &self.workout.efforts) {
+            for shapes in &draw_efforts(&bounds, &self.workout.borrow().efforts) {
                 let drawn_shape = shapes.draw();
                 frame.fill(&drawn_shape, Color::from_rgb8(255, 255, 255));
             }
