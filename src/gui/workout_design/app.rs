@@ -4,8 +4,7 @@ use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::Visualizer;
 use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
-use iced::theme::Container;
-use iced::widget::{button, scrollable, Column, Row, Text};
+use iced::widget::{button, container, Column, Row, Text};
 use iced::{Alignment, Element, Length};
 use rfd::FileDialog;
 use std::fs::{remove_file, File, OpenOptions};
@@ -15,8 +14,6 @@ pub struct WorkoutDesigner {
     workout: workout::Workout,
     effort_unit_input: EffortUnitInput,
     visualizer: Visualizer,
-    export_button: button::State,
-    scrollable_efforts: scrollable::State,
 }
 
 impl Default for WorkoutDesigner {
@@ -30,8 +27,6 @@ impl Default for WorkoutDesigner {
             ),
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
-            export_button: button::State::new(),
-            scrollable_efforts: scrollable::State::new(),
         }
     }
 }
@@ -62,8 +57,6 @@ impl From<Workout> for WorkoutDesigner {
             workout,
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
-            export_button: button::State::new(),
-            scrollable_efforts: scrollable::State::new(),
         }
     }
 }
@@ -78,8 +71,6 @@ impl WorkoutDesigner {
             workout: workout::Workout::empty(workout_name, workout_description, workout_type),
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
-            export_button: button::State::new(),
-            scrollable_efforts: scrollable::State::new(),
         }
     }
 
@@ -144,8 +135,8 @@ impl WorkoutDesigner {
         }
     }
 
-    pub fn view(&mut self) -> Element<WorkoutMessage> {
-        Container::new(self.elements())
+    pub fn view(&self) -> Element<WorkoutMessage> {
+        container(self.elements())
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
@@ -153,7 +144,7 @@ impl WorkoutDesigner {
             .into()
     }
 
-    fn elements(&'_ mut self) -> Column<'_, WorkoutMessage> {
+    fn elements(&self) -> Column<'_, WorkoutMessage> {
         let cloned_workout = self.workout.clone();
         elements::base_design(match self.workout.workout_type {
             workout::WorkoutType::PercentOfFTP => "Percentage of FTP Workout",
@@ -167,16 +158,13 @@ impl WorkoutDesigner {
                 .padding(20)
                 .push(
                     Column::new()
-                        .push(self.workout.view(&mut self.scrollable_efforts))
+                        .push(self.workout.view())
                         .push(
-                            button::Button::new(
-                                &mut self.export_button,
-                                Text::new("Export Workout"),
-                            )
-                            .on_press(WorkoutMessage::from(
-                                WorkoutDesignerMessage::ExportButtonPressed,
-                            ))
-                            .width(Length::Units(120)),
+                            button::Button::new(Text::new("Export Workout"))
+                                .on_press(WorkoutMessage::from(
+                                    WorkoutDesignerMessage::ExportButtonPressed,
+                                ))
+                                .width(Length::Fixed(120.0)),
                         )
                         .width(Length::FillPortion(1))
                         .spacing(20)

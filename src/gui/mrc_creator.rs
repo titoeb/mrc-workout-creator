@@ -58,7 +58,7 @@ impl Sandbox for MRCCreator {
         }
     }
 
-    fn view(&mut self) -> Element<WorkoutMessage> {
+    fn view(&self) -> Element<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDefinition(workout_definition) => workout_definition.view(),
             MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
@@ -139,7 +139,7 @@ where
         },
         flags: Default::default(),
         default_font: Default::default(),
-        default_text_size: 20,
+        default_text_size: 20.0,
         text_multithreading: false,
         antialiasing: false,
         exit_on_close_request: true,
