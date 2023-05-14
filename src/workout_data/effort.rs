@@ -1,5 +1,4 @@
 use crate::workout_data::ToMRC;
-use iced::widget::{button, text_input};
 use serde::{Deserialize, Serialize};
 
 /// Combining a type of effort with a duration
@@ -16,16 +15,10 @@ pub struct Effort {
 
 #[derive(Debug, Clone)]
 pub enum EffortState {
-    Idle {
-        edit_button: button::State,
-        delete_button: button::State,
-    },
+    Idle,
     Editing {
-        starting_value_state: text_input::State,
         starting_value: String,
-        ending_value_state: text_input::State,
         ending_value: String,
-        duration_in_minutes_state: text_input::State,
         duration_in_minutes: String,
     },
 }
@@ -38,10 +31,7 @@ impl PartialEq for EffortState {
 
 impl Default for EffortState {
     fn default() -> Self {
-        EffortState::Idle {
-            edit_button: button::State::new(),
-            delete_button: button::State::new(),
-        }
+        EffortState::Idle
     }
 }
 
@@ -68,21 +58,15 @@ impl Effort {
 
     pub fn to_edit(&mut self) {
         self.gui_state = EffortState::Editing {
-            starting_value_state: text_input::State::default(),
             starting_value: self.starting_value.to_mrc(),
-            ending_value_state: text_input::State::default(),
             ending_value: self.ending_value.to_mrc(),
-            duration_in_minutes_state: text_input::State::default(),
             duration_in_minutes: self.duration_in_minutes.to_mrc(),
         }
     }
     pub fn to_idle(&mut self) {
         if let EffortState::Editing {
-            starting_value_state: _,
             starting_value,
-            ending_value_state: _,
             ending_value,
-            duration_in_minutes_state: _,
             duration_in_minutes,
         } = &mut self.gui_state
         {
@@ -108,11 +92,8 @@ impl Effort {
     }
     pub fn update_duration_of_effort(&mut self, updated_duration_of_effort: String) {
         if let EffortState::Editing {
-            starting_value_state: _,
             starting_value: _,
-            ending_value_state: _,
             ending_value: _,
-            duration_in_minutes_state: _,
             duration_in_minutes,
         } = &mut self.gui_state
         {
@@ -121,11 +102,8 @@ impl Effort {
     }
     pub fn update_starting_value(&mut self, updated_starting_value: String) {
         if let EffortState::Editing {
-            starting_value_state: _,
             starting_value,
             ending_value: _,
-            ending_value_state: _,
-            duration_in_minutes_state: _,
             duration_in_minutes: _,
         } = &mut self.gui_state
         {
@@ -134,11 +112,8 @@ impl Effort {
     }
     pub fn update_ending_value(&mut self, updated_ending_value: String) {
         if let EffortState::Editing {
-            starting_value_state: _,
             starting_value: _,
             ending_value,
-            ending_value_state: _,
-            duration_in_minutes_state: _,
             duration_in_minutes: _,
         } = &mut self.gui_state
         {

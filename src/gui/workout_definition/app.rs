@@ -1,21 +1,15 @@
 use super::elements;
 use crate::gui::mrc_creator::WorkoutMessage;
 use crate::workout_data::workout::WorkoutType;
-use iced::theme::Container;
-use iced::widget::{button, pick_list, Column};
+use iced::widget::{container, Column};
 use iced::{Element, Length};
 
 /// Holding the state of the overall MRCCreator Application.
 #[derive(Default)]
 pub struct WorkoutDefiner {
-    pick_list: pick_list::State<WorkoutType>,
     selected_workout_type: Option<WorkoutType>,
     workout_name: String,
     workout_description: String,
-    name_input: State,
-    workout_input: State,
-    generate_button: button::State,
-    load_workout_button: button::State,
 }
 
 #[derive(Debug, Clone)]
@@ -46,8 +40,8 @@ impl WorkoutDefiner {
         }
     }
 
-    pub fn view(&mut self) -> Element<WorkoutMessage> {
-        Container::new(self.elements())
+    pub fn view(&self) -> Element<WorkoutMessage> {
+        container(self.elements())
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
@@ -55,24 +49,16 @@ impl WorkoutDefiner {
             .into()
     }
 
-    fn elements(&'_ mut self) -> Column<'_, WorkoutMessage> {
+    fn elements(&self) -> Column<'_, WorkoutMessage> {
         elements::base_design()
             .push(elements::select_workout_type_drop_down(
-                &mut self.pick_list,
                 self.selected_workout_type,
             ))
-            .push(elements::enter_workout_name(
-                &mut self.name_input,
-                &self.workout_name,
-            ))
+            .push(elements::enter_workout_name(&self.workout_name))
             .push(elements::enter_workout_description(
-                &mut self.workout_input,
                 &self.workout_description,
             ))
-            .push(elements::switch_to_workout_design(
-                &mut self.generate_button,
-                &mut self.load_workout_button,
-            ))
+            .push(elements::switch_to_workout_design())
     }
 
     pub fn get_workout_name(&self) -> &str {

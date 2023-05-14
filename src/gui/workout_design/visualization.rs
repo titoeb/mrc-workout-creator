@@ -1,7 +1,7 @@
 use crate::workout_data::workout;
 use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::widget::canvas;
-use iced::{Color, Element, Length, Point, Rectangle, Size};
+use iced::{Color, Element, Length, Point, Rectangle, Size, Theme};
 #[derive(Default)]
 pub struct Visualizer {
     cache: canvas::Cache,
@@ -9,8 +9,9 @@ pub struct Visualizer {
 }
 
 impl Visualizer {
-    pub fn view(&'_ mut self, workout: workout::Workout) -> impl Into<Element<'_, WorkoutMessage>> {
-        self.workout = workout;
+    pub fn view(&self, _workout: workout::Workout) -> impl Into<Element<'_, WorkoutMessage>> {
+        // TODO: How to do this now?
+        // self.workout=workout
         self.cache.clear();
         canvas::Canvas::new(self)
             .width(Length::Fill)
@@ -18,8 +19,15 @@ impl Visualizer {
     }
 }
 
-impl canvas::Program<WorkoutMessage> for Visualizer {
-    fn draw(&self, bounds: Rectangle, _cursor: canvas::Cursor) -> Vec<canvas::Geometry> {
+impl canvas::Program<WorkoutMessage> for &Visualizer {
+    type State = ();
+    fn draw(
+        &self,
+        _state: &Self::State,
+        _theme: &Theme,
+        bounds: Rectangle,
+        _cursor: canvas::Cursor,
+    ) -> Vec<canvas::Geometry> {
         let draw_all = self.cache.draw(bounds.size(), |frame| {
             let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
             frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
@@ -34,7 +42,7 @@ impl canvas::Program<WorkoutMessage> for Visualizer {
     }
 }
 
-fn draw_efforts<'a>(bounds: &'a Rectangle, efforts: &[effort::Effort]) -> Vec<Box<dyn Drawable>> {
+fn draw_efforts(bounds: &'_ Rectangle, efforts: &[effort::Effort]) -> Vec<Box<dyn Drawable>> {
     let durations = efforts
         .iter()
         .map(|effort| effort.duration_in_minutes as f32)
