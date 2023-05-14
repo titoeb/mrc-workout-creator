@@ -11,9 +11,9 @@ use iced::{Alignment, Element};
 pub struct EffortUnitInput {
     padding: u16,
     size: u16,
-    _on_starting_value_change: fn(String) -> WorkoutMessage,
-    _on_ending_value_change: fn(String) -> WorkoutMessage,
-    _on_duration_change: fn(String) -> WorkoutMessage,
+    on_starting_value_change: fn(String) -> WorkoutMessage,
+    on_ending_value_change: fn(String) -> WorkoutMessage,
+    on_duration_change: fn(String) -> WorkoutMessage,
     creation_message: WorkoutMessage,
     effort: EffortInput,
     duration: DurationInput,
@@ -69,9 +69,9 @@ impl EffortUnitInput {
             padding,
             size,
             creation_message,
-            _on_starting_value_change: on_starting_value_change,
-            _on_ending_value_change: on_ending_value_change,
-            _on_duration_change: on_duration_change,
+            on_starting_value_change,
+            on_ending_value_change,
+            on_duration_change,
             effort: EffortInput::default(),
             duration: DurationInput::default(),
         }
@@ -103,19 +103,22 @@ impl EffortUnitInput {
                 text_input::TextInput::new("Duration", &self.duration.value)
                     .padding(self.padding)
                     .size(self.size)
-                    .on_submit(self.creation_message.clone()),
+                    .on_submit(self.creation_message.clone())
+                    .on_input(self.on_duration_change),
             )
             .push(
                 text_input::TextInput::new("Starting Value", &self.effort.starting_value)
                     .padding(self.padding)
                     .size(self.size)
-                    .on_submit(self.creation_message.clone()),
+                    .on_submit(self.creation_message.clone())
+                    .on_input(self.on_starting_value_change),
             )
             .push(
                 text_input::TextInput::new("Ending Value", &self.effort.ending_value)
                     .padding(self.padding)
                     .size(self.size)
-                    .on_submit(self.creation_message.clone()),
+                    .on_submit(self.creation_message.clone())
+                    .on_input(self.on_ending_value_change),
             )
     }
 }
