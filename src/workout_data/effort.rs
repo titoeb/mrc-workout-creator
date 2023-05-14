@@ -13,8 +13,9 @@ pub struct Effort {
     pub gui_state: EffortState,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum EffortState {
+    #[default]
     Idle,
     Editing {
         starting_value: String,
@@ -26,12 +27,6 @@ pub enum EffortState {
 impl PartialEq for EffortState {
     fn eq(&self, other: &Self) -> bool {
         format!("{:?}", self) == format!("{:?}", other)
-    }
-}
-
-impl Default for EffortState {
-    fn default() -> Self {
-        EffortState::Idle
     }
 }
 
