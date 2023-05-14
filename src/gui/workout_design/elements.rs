@@ -4,10 +4,8 @@ use super::app::{EffortMessage, WorkoutDesignerMessage};
 use crate::gui::mrc_creator::WorkoutMessage;
 use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
-use iced::{
-    container, scrollable, text_input, Alignment, Button, Color, Column, Element, Row, Text,
-    TextInput,
-};
+use iced::widget::{container, scrollable, text_input, Button, Column, Row, Text};
+use iced::{Alignment, Color, Element};
 
 #[derive(Debug, Clone)]
 pub struct EffortUnitInput {

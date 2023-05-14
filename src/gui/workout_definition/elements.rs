@@ -2,10 +2,8 @@ use crate::gui::mrc_creator::WorkoutMessage;
 use crate::gui::workout_definition::app::WorkoutDefinerMessage;
 use crate::workout_data::workout::WorkoutType;
 use iced::alignment::{Alignment, Horizontal};
-use iced::button;
-use iced::text_input::State;
-use iced::widget::pick_list;
-use iced::{Button, Color, Column, PickList, Row, Text, TextInput};
+use iced::widget::{button, pick_list, Button, Column, PickList, Row, Text, TextInput};
+use iced::Color;
 
 pub(super) fn select_workout_type_drop_down(
     pick_list: &mut pick_list::State<WorkoutType>,

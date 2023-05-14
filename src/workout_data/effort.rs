@@ -1,5 +1,5 @@
 use crate::workout_data::ToMRC;
-use iced::{button, text_input};
+use iced::widget::{button, text_input};
 use serde::{Deserialize, Serialize};
 
 /// Combining a type of effort with a duration
