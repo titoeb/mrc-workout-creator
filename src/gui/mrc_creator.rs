@@ -64,10 +64,7 @@ impl Sandbox for MRCCreator {
             MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
         }
     }
-
-    fn background_color(&self) -> iced::Color {
-        iced::Color::from_rgb8(24, 24, 24)
-    }
+    // TODO: Make Backround color to `rgb8(24, 24, 24)` maybe via scheme?
 }
 
 impl MRCCreator {
