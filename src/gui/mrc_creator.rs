@@ -136,6 +136,8 @@ where
             decorations: true,
             transparent: true,
             always_on_top: false,
+            visible: true,
+            platform_specific: window::PlatformSpecific::default(),
             icon: None,
         },
         flags: Default::default(),
