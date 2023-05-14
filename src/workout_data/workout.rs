@@ -111,8 +111,9 @@ impl Workout {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Copy, Default)]
 pub enum WorkoutType {
+    #[default]
     Watts,
     PercentOfFTP,
 }
