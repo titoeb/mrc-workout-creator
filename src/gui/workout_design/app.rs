@@ -79,11 +79,10 @@ impl WorkoutDesigner {
             }
             WorkoutDesignerMessage::CreateTask => {
                 if !self.effort_unit_input.is_empty() {
-                    self.workout.add_effort(
-                        effort::Effort::try_from(self.effort_unit_input.clone())
-                            .expect("Could not create effort"),
-                    );
-                    self.effort_unit_input.clear();
+                    if let Ok(effort) = effort::Effort::try_from(self.effort_unit_input.clone()) {
+                        self.workout.add_effort(effort);
+                        self.effort_unit_input.clear();
+                    }
                 }
             }
             WorkoutDesignerMessage::Effort(index, EffortMessage::Delete) => {

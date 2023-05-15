@@ -70,11 +70,13 @@ impl Workout {
     }
     /// Make an effort editable in the gui.
     pub fn to_edit(&mut self, index: usize) {
-        self.efforts[index].to_edit();
+        self.efforts[index].to_edit()
     }
     /// Make an effort editable in the gui.
     pub fn to_idle(&mut self, index: usize) {
-        self.efforts[index].to_idle();
+        if let Some(new_effort) = self.efforts[index].to_idle() {
+            self.efforts[index] = new_effort;
+        }
     }
     pub fn update_duration_of_effort(&mut self, index: usize, updated_duration_in_minutes: String) {
         self.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
