@@ -19,12 +19,7 @@ pub struct WorkoutDesigner {
 impl Default for WorkoutDesigner {
     fn default() -> Self {
         Self {
-            workout: workout::Workout::new(
-                "untitled",
-                "no description",
-                vec![],
-                workout::WorkoutType::Watts,
-            ),
+            workout: workout::Workout::new("untitled", "no description", vec![]),
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
         }
@@ -62,13 +57,9 @@ impl From<Workout> for WorkoutDesigner {
 }
 
 impl WorkoutDesigner {
-    pub fn new(
-        workout_name: &'_ str,
-        workout_description: &'_ str,
-        workout_type: workout::WorkoutType,
-    ) -> Self {
+    pub fn new(workout_name: &'_ str, workout_description: &'_ str) -> Self {
         Self {
-            workout: workout::Workout::empty(workout_name, workout_description, workout_type),
+            workout: workout::Workout::empty(workout_name, workout_description),
             effort_unit_input: EffortUnitInput::default(),
             visualizer: Visualizer::default(),
         }
@@ -146,36 +137,33 @@ impl WorkoutDesigner {
 
     fn elements(&self) -> Column<'_, WorkoutMessage> {
         let cloned_workout = self.workout.clone();
-        elements::base_design(match self.workout.workout_type {
-            workout::WorkoutType::PercentOfFTP => "Percentage of FTP Workout",
-            workout::WorkoutType::Watts => "Watts Workout",
-        })
-        .push(self.effort_unit_input.view())
-        .padding(10)
-        .spacing(30)
-        .push(
-            Row::new()
-                .padding(20)
-                .push(
-                    Column::new()
-                        .push(self.workout.view())
-                        .push(
-                            button::Button::new(Text::new("Export Workout"))
-                                .on_press(WorkoutMessage::from(
-                                    WorkoutDesignerMessage::ExportButtonPressed,
-                                ))
-                                .width(Length::Fixed(120.0)),
-                        )
-                        .width(Length::FillPortion(1))
-                        .spacing(20)
-                        .align_items(Alignment::Center),
-                )
-                .push(
-                    Row::new()
-                        .push(self.visualizer.view(cloned_workout))
-                        .width(Length::FillPortion(2)),
-                ),
-        )
+        elements::base_design("Watts Workout")
+            .push(self.effort_unit_input.view())
+            .padding(10)
+            .spacing(30)
+            .push(
+                Row::new()
+                    .padding(20)
+                    .push(
+                        Column::new()
+                            .push(self.workout.view())
+                            .push(
+                                button::Button::new(Text::new("Export Workout"))
+                                    .on_press(WorkoutMessage::from(
+                                        WorkoutDesignerMessage::ExportButtonPressed,
+                                    ))
+                                    .width(Length::Fixed(120.0)),
+                            )
+                            .width(Length::FillPortion(1))
+                            .spacing(20)
+                            .align_items(Alignment::Center),
+                    )
+                    .push(
+                        Row::new()
+                            .push(self.visualizer.view(cloned_workout))
+                            .width(Length::FillPortion(2)),
+                    ),
+            )
     }
 }
 
