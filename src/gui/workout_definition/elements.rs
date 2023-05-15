@@ -19,17 +19,6 @@ pub(super) fn select_workout_type_drop_down<'a>(
         .padding(10),
     )
 }
-pub(super) fn enter_workout_name<'a>(name: &str) -> Row<'a, WorkoutMessage> {
-    Row::new().push(
-        TextInput::new("Workout Name", name)
-            .on_input(|workout_name| {
-                WorkoutMessage::from(WorkoutDefinerMessage::NameGiven(workout_name))
-            })
-            .padding(5)
-            .size(50)
-            .width(iced::Length::Fixed(350.0)),
-    )
-}
 
 pub(super) fn enter_workout_description<'a>(description: &str) -> Row<'a, WorkoutMessage> {
     Row::new().push(
