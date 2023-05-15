@@ -34,6 +34,7 @@ pub enum WorkoutDesignerMessage {
     CreateTask,
     Effort(usize, EffortMessage),
     ExportButtonPressed,
+    LoadWorkoutPressed,
 }
 
 #[derive(Debug, Clone)]
@@ -123,6 +124,9 @@ impl WorkoutDesigner {
                     }
                 }
             }
+            WorkoutDesignerMessage::LoadWorkoutPressed => {
+                todo!()
+            }
         }
     }
 
@@ -151,6 +155,13 @@ impl WorkoutDesigner {
                                 button::Button::new(Text::new("Export Workout"))
                                     .on_press(WorkoutMessage::from(
                                         WorkoutDesignerMessage::ExportButtonPressed,
+                                    ))
+                                    .width(Length::Fixed(120.0)),
+                            )
+                            .push(
+                                button::Button::new(Text::new("Load existing Workout"))
+                                    .on_press(WorkoutMessage::from(
+                                        WorkoutDesignerMessage::LoadWorkoutPressed,
                                     ))
                                     .width(Length::Fixed(120.0)),
                             )

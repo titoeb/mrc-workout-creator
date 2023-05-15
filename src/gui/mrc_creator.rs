@@ -54,6 +54,9 @@ impl Sandbox for MRCCreator {
             WorkoutMessage::Definition(WorkoutDefinerMessage::LoadWorkoutClicked) => {
                 self.load_workout_from_file()
             }
+            WorkoutMessage::Design(WorkoutDesignerMessage::LoadWorkoutPressed) => {
+                self.load_workout_from_file()
+            }
             _ => self.handle_subpage_messages(message),
         }
     }
