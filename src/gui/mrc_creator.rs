@@ -72,18 +72,10 @@ impl Sandbox for MRCCreator {
 impl MRCCreator {
     fn switch_to_workout_design(&mut self) {
         if let MRCCreator::WorkoutDefinition(workout_definition) = self {
-            match workout_definition.get_selected_workout_type() {
-                Some(workout_type) => {
-                    *self = MRCCreator::WorkoutDesign(WorkoutDesigner::new(
-                        workout_definition.get_workout_name(),
-                        workout_definition.get_workout_description(),
-                        workout_type,
-                    ));
-                }
-                None => {
-                    eprintln!("Please select a workout type first!")
-                }
-            }
+            *self = MRCCreator::WorkoutDesign(WorkoutDesigner::new(
+                workout_definition.get_workout_name(),
+                workout_definition.get_workout_description(),
+            ));
         }
     }
 

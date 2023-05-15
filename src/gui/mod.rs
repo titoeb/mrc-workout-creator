@@ -9,5 +9,3 @@ pub mod workout_definition;
 /// The second page of the WorkoutCreator on which
 /// the individual efforts of the workouts are designed.
 pub mod workout_design;
-
-pub mod workout_type;

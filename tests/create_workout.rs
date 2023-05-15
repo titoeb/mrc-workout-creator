@@ -1,4 +1,4 @@
-use mrc_workout_creator::workout_data::{effort::Effort, workout::Workout, workout::WorkoutType};
+use mrc_workout_creator::workout_data::{effort::Effort, workout::Workout};
 
 #[test]
 fn create_watt_workout() {
@@ -10,6 +10,5 @@ fn create_watt_workout() {
             Effort::new(300.0, 100.0, None),
             Effort::new(60.0, 150.0, None),
         ],
-        WorkoutType::Watts,
     );
 }
