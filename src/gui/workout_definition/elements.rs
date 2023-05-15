@@ -2,7 +2,7 @@ use crate::gui::mrc_creator::WorkoutMessage;
 use crate::gui::workout_definition::app::WorkoutDefinerMessage;
 use crate::workout_data::workout::WorkoutType;
 use iced::alignment::{Alignment, Horizontal};
-use iced::widget::{Button, Column, PickList, Row, Text, TextInput};
+use iced::widget::{Button, Column, PickList, Row, Text};
 
 pub(super) fn select_workout_type_drop_down<'a>(
     currently_selected_workout: Option<WorkoutType>,
@@ -17,18 +17,6 @@ pub(super) fn select_workout_type_drop_down<'a>(
         .padding(5)
         .text_size(35)
         .padding(10),
-    )
-}
-
-pub(super) fn enter_workout_description<'a>(description: &str) -> Row<'a, WorkoutMessage> {
-    Row::new().push(
-        TextInput::new("Workout Description", description)
-            .on_input(|workout_description| {
-                WorkoutMessage::from(WorkoutDefinerMessage::DescriptionGiven(workout_description))
-            })
-            .padding(5)
-            .size(20)
-            .width(iced::Length::Fixed(400.0)),
     )
 }
 
