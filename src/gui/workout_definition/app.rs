@@ -15,7 +15,6 @@ pub struct WorkoutDefiner {
 #[derive(Debug, Clone)]
 pub enum WorkoutDefinerMessage {
     TypeSelected(WorkoutType),
-    NameGiven(String),
     DescriptionGiven(String),
     GenerateWorkoutClicked,
     LoadWorkoutClicked,
@@ -27,7 +26,6 @@ impl WorkoutDefiner {
             WorkoutDefinerMessage::TypeSelected(workout_type) => {
                 self.selected_workout_type = Some(workout_type);
             }
-            WorkoutDefinerMessage::NameGiven(workout_name) => self.workout_name = workout_name,
             WorkoutDefinerMessage::DescriptionGiven(workout_description) => {
                 self.workout_description = workout_description
             }
@@ -54,7 +52,6 @@ impl WorkoutDefiner {
             .push(elements::select_workout_type_drop_down(
                 self.selected_workout_type,
             ))
-            .push(elements::enter_workout_name(&self.workout_name))
             .push(elements::enter_workout_description(
                 &self.workout_description,
             ))
