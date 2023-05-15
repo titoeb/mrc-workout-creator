@@ -58,32 +58,26 @@ impl Effort {
             duration_in_minutes: self.duration_in_minutes.to_mrc(),
         }
     }
-    pub fn to_idle(&mut self) {
+    pub fn to_idle(&self) -> Option<Effort> {
         if let EffortState::Editing {
             starting_value,
             ending_value,
             duration_in_minutes,
-        } = &mut self.gui_state
+        } = &self.gui_state
         {
             let new_ending_value = if ending_value.is_empty() {
                 None
             } else {
-                Some(
-                    ending_value
-                        .parse()
-                        .expect("Please provide a valid positive float."),
-                )
+                Some(ending_value.parse().ok()?)
             };
-            *self = Effort::new(
-                duration_in_minutes
-                    .parse()
-                    .expect("Please provide a valid positive float."),
-                starting_value
-                    .parse()
-                    .expect("Please provide a valid positive float."),
+
+            return Some(Effort::new(
+                duration_in_minutes.parse().ok()?,
+                starting_value.parse().ok()?,
                 new_ending_value,
-            );
+            ));
         }
+        None
     }
     pub fn update_duration_of_effort(&mut self, updated_duration_of_effort: String) {
         if let EffortState::Editing {
