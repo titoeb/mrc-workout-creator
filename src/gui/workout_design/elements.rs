@@ -149,10 +149,8 @@ impl TryFrom<EffortUnitInput> for effort::Effort {
     }
 }
 
-pub(super) fn base_design(title: &'_ str) -> Column<'_, WorkoutMessage> {
-    Column::new()
-        .align_items(Alignment::Center)
-        .push(WhiteText::new(title.to_string()).size(40))
+pub(super) fn base_design<'a>() -> Column<'a, WorkoutMessage> {
+    Column::new().align_items(Alignment::Center)
 }
 
 impl<'a> workout::Workout {
@@ -259,11 +257,6 @@ impl WhiteText<'_> {
     fn new(white_text: String) -> Self {
         Self {
             text: text(white_text).size(25),
-        }
-    }
-    fn size(self, size: u16) -> Self {
-        Self {
-            text: self.text.size(size),
         }
     }
 }
