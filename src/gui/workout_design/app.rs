@@ -140,7 +140,7 @@ impl WorkoutDesigner {
 
     fn elements(&self) -> Column<'_, WorkoutMessage> {
         let cloned_workout = self.workout.clone();
-        elements::base_design("Watts Workout")
+        elements::base_design()
             .push(self.effort_unit_input.view())
             .padding(10)
             .spacing(30)
