@@ -1,6 +1,7 @@
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
 use crate::workout_data::workout;
-use iced::{window, Element, Sandbox, Settings, Theme};
+use iced::executor;
+use iced::{window, Application, Command, Element, Settings, Theme};
 use rfd::FileDialog;
 use std::fs;
 
@@ -26,24 +27,28 @@ impl From<WorkoutDesignerMessage> for WorkoutMessage {
     }
 }
 
-impl Sandbox for MRCCreator {
+impl Application for MRCCreator {
     type Message = WorkoutMessage;
+    type Executor = executor::Default;
+    type Flags = ();
+    type Theme = Theme;
 
-    fn new() -> Self {
-        Self::default()
+    fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
+        (Self::default(), Command::none())
     }
 
     fn title(&self) -> String {
         String::from("Workout Generator")
     }
 
-    fn update(&mut self, message: WorkoutMessage) {
+    fn update(&mut self, message: WorkoutMessage) -> Command<Self::Message> {
         match message {
             WorkoutMessage::Design(WorkoutDesignerMessage::LoadWorkoutPressed) => {
                 self.load_workout_from_file()
             }
             _ => self.handle_subpage_messages(message),
-        }
+        };
+        Command::none()
     }
 
     fn view(&self) -> Element<WorkoutMessage> {
