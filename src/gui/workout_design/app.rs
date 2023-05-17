@@ -11,8 +11,10 @@ use iced::widget::{focus_next, focus_previous};
 use iced::Event::Keyboard;
 use iced::{Alignment, Command, Element, Event, Length};
 use rfd::FileDialog;
+use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::Write;
+
 use std::path;
 
 pub struct WorkoutDesigner {
@@ -71,7 +73,23 @@ impl WorkoutDesigner {
             visualizer: Visualizer::default(),
         }
     }
-
+    fn load_workout_from_file(&mut self) -> Command<WorkoutMessage> {
+        if let Some(json_file_to_read) = FileDialog::new()
+            .add_filter("Only Select json files", &["json"])
+            .pick_file()
+        {
+            if let Ok(json_to_load) = fs::File::open(json_file_to_read) {
+                if let Ok(loaded_workout) =
+                    serde_json::from_reader::<fs::File, workout::Workout>(json_to_load)
+                {
+                    *self = WorkoutDesigner::from(loaded_workout);
+                } else {
+                    eprintln!("Invalid Json file.")
+                }
+            }
+        }
+        Command::none()
+    }
     pub fn update(&mut self, message: WorkoutDesignerMessage) -> Command<WorkoutMessage> {
         match message {
             WorkoutDesignerMessage::EffortUnitStartingValueChanged(value) => {
@@ -146,7 +164,7 @@ impl WorkoutDesigner {
                 };
                 Command::none()
             }
-            WorkoutDesignerMessage::LoadWorkoutPressed => handled_by_mrc_creator(),
+            WorkoutDesignerMessage::LoadWorkoutPressed => self.load_workout_from_file(),
             WorkoutDesignerMessage::IcedEvent(event) => {
                 if let Keyboard(key) = event {
                     match key {
@@ -233,8 +251,5 @@ fn get_path_to_json_file(path_to_mrc_file: &path::Path) -> path::PathBuf {
 }
 
 fn ignore_event() -> Command<WorkoutMessage> {
-    Command::none()
-}
-fn handled_by_mrc_creator() -> Command<WorkoutMessage> {
     Command::none()
 }

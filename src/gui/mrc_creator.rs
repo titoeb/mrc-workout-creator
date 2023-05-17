@@ -1,10 +1,7 @@
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
-use crate::workout_data::workout;
 use iced::executor;
 use iced::subscription;
 use iced::{window, Application, Command, Element, Settings, Theme};
-use rfd::FileDialog;
-use std::fs;
 
 /// Holding the state of the overall CRMCreator Application.
 pub enum MRCCreator {
@@ -45,10 +42,6 @@ impl Application for MRCCreator {
 
     fn update(&mut self, message: WorkoutMessage) -> Command<Self::Message> {
         match message {
-            WorkoutMessage::Design(WorkoutDesignerMessage::LoadWorkoutPressed) => {
-                self.load_workout_from_file();
-                Command::none()
-            }
             WorkoutMessage::Design(_) => self.handle_subpage_messages(message),
             WorkoutMessage::IcedEvent(event) => self.handle_iced_events(event),
         }
@@ -69,23 +62,6 @@ impl Application for MRCCreator {
 }
 
 impl MRCCreator {
-    fn load_workout_from_file(&mut self) {
-        if let Some(json_file_to_read) = FileDialog::new()
-            .add_filter("Only Select json files", &["json"])
-            .pick_file()
-        {
-            if let Ok(json_to_load) = fs::File::open(json_file_to_read) {
-                if let Ok(loaded_workout) =
-                    serde_json::from_reader::<fs::File, workout::Workout>(json_to_load)
-                {
-                    *self = MRCCreator::WorkoutDesign(WorkoutDesigner::from(loaded_workout));
-                } else {
-                    eprintln!("Invalid Json file.")
-                }
-            }
-        }
-    }
-
     fn handle_subpage_messages(&mut self, message: WorkoutMessage) -> Command<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => {
