@@ -39,10 +39,10 @@ pub enum WorkoutDesignerMessage {
     EffortUnitEndingValueChanged(String),
     EffortUnitInputDurationChanged(String),
     CreateTask,
-    Effort(usize, EffortMessage),
     ExportButtonPressed,
     LoadWorkoutPressed,
     IcedEvent(Event),
+    Effort(usize, EffortMessage),
 }
 
 #[derive(Debug, Clone)]
@@ -113,39 +113,6 @@ impl WorkoutDesigner {
                 }
                 Command::none()
             }
-            WorkoutDesignerMessage::Effort(index, EffortMessage::Delete) => {
-                self.workout.remove(index);
-                Command::none()
-            }
-            WorkoutDesignerMessage::Effort(index, EffortMessage::Edit) => {
-                self.workout.to_edit(index);
-                Command::none()
-            }
-            WorkoutDesignerMessage::Effort(index, EffortMessage::ModificationDone) => {
-                self.workout.to_idle(index);
-                Command::none()
-            }
-            WorkoutDesignerMessage::Effort(
-                index,
-                EffortMessage::UpdateDurationInMinutes(updated_duration_in_minutes),
-            ) => {
-                self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
-                Command::none()
-            }
-            WorkoutDesignerMessage::Effort(
-                index,
-                EffortMessage::UpdateStartingValue(updated_value),
-            ) => {
-                self.workout.efforts[index].update_starting_value(updated_value);
-                Command::none()
-            }
-            WorkoutDesignerMessage::Effort(
-                index,
-                EffortMessage::UpdateEndingValue(updated_value),
-            ) => {
-                self.workout.efforts[index].update_ending_value(updated_value);
-                Command::none()
-            }
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(mrc_file_to_write_to) = FileDialog::new()
                     .add_filter("Only Select mrc files", &["mrc"])
@@ -182,6 +149,41 @@ impl WorkoutDesigner {
                     ignore_event()
                 }
             }
+            WorkoutDesignerMessage::Effort(index, effort_message) => {
+                self.handle_effort_message(index, effort_message)
+            }
+        }
+    }
+    pub fn handle_effort_message(
+        &mut self,
+        index: usize,
+        effort_message: EffortMessage,
+    ) -> Command<WorkoutMessage> {
+        match effort_message {
+            EffortMessage::Delete => {
+                self.workout.remove(index);
+                Command::none()
+            }
+            EffortMessage::Edit => {
+                self.workout.to_edit(index);
+                Command::none()
+            }
+            EffortMessage::ModificationDone => {
+                self.workout.to_idle(index);
+                Command::none()
+            }
+            EffortMessage::UpdateDurationInMinutes(updated_duration_in_minutes) => {
+                self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
+                Command::none()
+            }
+            EffortMessage::UpdateStartingValue(updated_value) => {
+                self.workout.efforts[index].update_starting_value(updated_value);
+                Command::none()
+            }
+            EffortMessage::UpdateEndingValue(updated_value) => {
+                self.workout.efforts[index].update_ending_value(updated_value);
+                Command::none()
+            }
         }
     }
 
@@ -195,41 +197,44 @@ impl WorkoutDesigner {
     }
 
     fn elements(&self) -> Column<'_, WorkoutMessage> {
-        let cloned_workout = self.workout.clone();
         elements::base_design()
             .push(self.effort_unit_input.view())
-            .padding(10)
-            .spacing(30)
             .push(
                 Row::new()
                     .padding(20)
-                    .push(
-                        Column::new()
-                            .push(self.workout.view())
-                            .push(
-                                button::Button::new(Text::new("Export Workout"))
-                                    .on_press(WorkoutMessage::from(
-                                        WorkoutDesignerMessage::ExportButtonPressed,
-                                    ))
-                                    .width(Length::Fixed(120.0)),
-                            )
-                            .push(
-                                button::Button::new(Text::new("Load existing Workout"))
-                                    .on_press(WorkoutMessage::from(
-                                        WorkoutDesignerMessage::LoadWorkoutPressed,
-                                    ))
-                                    .width(Length::Fixed(120.0)),
-                            )
-                            .width(Length::FillPortion(1))
-                            .spacing(20)
-                            .align_items(Alignment::Center),
-                    )
-                    .push(
-                        Row::new()
-                            .push(self.visualizer.view(cloned_workout))
-                            .width(Length::FillPortion(2)),
-                    ),
+                    .push(self.display_workout_and_buttons())
+                    .push(self.display_main_page()),
             )
+    }
+    fn display_main_page(&self) -> Row<'_, WorkoutMessage> {
+        let cloned_workout = self.workout.clone();
+        Row::new()
+            .push(self.visualizer.view(cloned_workout))
+            .width(Length::FillPortion(2))
+    }
+
+    fn display_workout_and_buttons(&self) -> Column<'_, WorkoutMessage> {
+        Column::new()
+            .push(self.workout.view())
+            .push(self.visualize_export_button())
+            .push(self.visualize_load_button())
+            .width(Length::FillPortion(1))
+            .spacing(20)
+            .align_items(Alignment::Center)
+    }
+    fn visualize_export_button(&self) -> button::Button<'_, WorkoutMessage> {
+        button::Button::new(Text::new("Export Workout"))
+            .on_press(WorkoutMessage::from(
+                WorkoutDesignerMessage::ExportButtonPressed,
+            ))
+            .width(Length::Fixed(120.0))
+    }
+    fn visualize_load_button(&self) -> button::Button<'_, WorkoutMessage> {
+        button::Button::new(Text::new("Load existing Workout"))
+            .on_press(WorkoutMessage::from(
+                WorkoutDesignerMessage::LoadWorkoutPressed,
+            ))
+            .width(Length::Fixed(120.0))
     }
 }
 
