@@ -4,12 +4,17 @@ use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::Visualizer;
 use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
+use iced::keyboard::Event::KeyPressed;
+use iced::keyboard::Modifiers;
 use iced::widget::{button, container, Column, Row, Text};
-use iced::{Alignment, Element, Length};
+use iced::widget::{focus_next, focus_previous};
+use iced::Event::Keyboard;
+use iced::{Alignment, Command, Element, Event, Length};
 use rfd::FileDialog;
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::Write;
 use std::path;
+
 pub struct WorkoutDesigner {
     workout: workout::Workout,
     effort_unit_input: EffortUnitInput,
@@ -35,6 +40,7 @@ pub enum WorkoutDesignerMessage {
     Effort(usize, EffortMessage),
     ExportButtonPressed,
     LoadWorkoutPressed,
+    IcedEvent(Event),
 }
 
 #[derive(Debug, Clone)]
@@ -139,10 +145,24 @@ impl WorkoutDesigner {
                     }
                 };
                 Command::none()
-                }
             }
-            WorkoutDesignerMessage::LoadWorkoutPressed => {
-                todo!()
+            WorkoutDesignerMessage::LoadWorkoutPressed => handled_by_mrc_creator(),
+            WorkoutDesignerMessage::IcedEvent(event) => {
+                if let Keyboard(key) = event {
+                    match key {
+                        KeyPressed {
+                            key_code: iced::keyboard::KeyCode::Tab,
+                            modifiers: Modifiers::SHIFT,
+                        } => focus_previous::<WorkoutMessage>(),
+                        KeyPressed {
+                            key_code: iced::keyboard::KeyCode::Tab,
+                            modifiers: _,
+                        } => focus_next::<WorkoutMessage>(),
+                        _ => ignore_event(),
+                    }
+                } else {
+                    ignore_event()
+                }
             }
         }
     }
@@ -210,4 +230,11 @@ fn open_or_create(path_to_file: &path::PathBuf) -> Option<File> {
 
 fn get_path_to_json_file(path_to_mrc_file: &path::Path) -> path::PathBuf {
     path_to_mrc_file.with_extension("").with_extension("json")
+}
+
+fn ignore_event() -> Command<WorkoutMessage> {
+    Command::none()
+}
+fn handled_by_mrc_creator() -> Command<WorkoutMessage> {
+    Command::none()
 }
