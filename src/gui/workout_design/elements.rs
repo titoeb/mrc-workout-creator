@@ -150,7 +150,10 @@ impl TryFrom<EffortUnitInput> for effort::Effort {
 }
 
 pub(super) fn base_design<'a>() -> Column<'a, WorkoutMessage> {
-    Column::new().align_items(Alignment::Center)
+    Column::new()
+        .align_items(Alignment::Center)
+        .padding(10)
+        .spacing(30)
 }
 
 impl<'a> workout::Workout {
