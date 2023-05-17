@@ -66,16 +66,19 @@ impl WorkoutDesigner {
         }
     }
 
-    pub fn update(&mut self, message: WorkoutDesignerMessage) {
+    pub fn update(&mut self, message: WorkoutDesignerMessage) -> Command<WorkoutMessage> {
         match message {
             WorkoutDesignerMessage::EffortUnitStartingValueChanged(value) => {
                 self.effort_unit_input.set_starting_value(value);
+                Command::none()
             }
             WorkoutDesignerMessage::EffortUnitEndingValueChanged(value) => {
                 self.effort_unit_input.set_ending_value(value);
+                Command::none()
             }
             WorkoutDesignerMessage::EffortUnitInputDurationChanged(value) => {
                 self.effort_unit_input.set_duration(value);
+                Command::none()
             }
             WorkoutDesignerMessage::CreateTask => {
                 if !self.effort_unit_input.is_empty() {
@@ -84,28 +87,41 @@ impl WorkoutDesigner {
                         self.effort_unit_input.clear();
                     }
                 }
+                Command::none()
             }
             WorkoutDesignerMessage::Effort(index, EffortMessage::Delete) => {
                 self.workout.remove(index);
+                Command::none()
             }
             WorkoutDesignerMessage::Effort(index, EffortMessage::Edit) => {
-                self.workout.to_edit(index)
+                self.workout.to_edit(index);
+                Command::none()
             }
             WorkoutDesignerMessage::Effort(index, EffortMessage::ModificationDone) => {
-                self.workout.to_idle(index)
+                self.workout.to_idle(index);
+                Command::none()
             }
             WorkoutDesignerMessage::Effort(
                 index,
                 EffortMessage::UpdateDurationInMinutes(updated_duration_in_minutes),
-            ) => self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes),
+            ) => {
+                self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
+                Command::none()
+            }
             WorkoutDesignerMessage::Effort(
                 index,
                 EffortMessage::UpdateStartingValue(updated_value),
-            ) => self.workout.efforts[index].update_starting_value(updated_value),
+            ) => {
+                self.workout.efforts[index].update_starting_value(updated_value);
+                Command::none()
+            }
             WorkoutDesignerMessage::Effort(
                 index,
                 EffortMessage::UpdateEndingValue(updated_value),
-            ) => self.workout.efforts[index].update_ending_value(updated_value),
+            ) => {
+                self.workout.efforts[index].update_ending_value(updated_value);
+                Command::none()
+            }
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(mrc_file_to_write_to) = FileDialog::new()
                     .add_filter("Only Select mrc files", &["mrc"])
@@ -121,6 +137,8 @@ impl WorkoutDesigner {
                         let _error_when_writing_json_file = opened_json
                             .write(serde_json::to_string(&self.workout).unwrap().as_bytes());
                     }
+                };
+                Command::none()
                 }
             }
             WorkoutDesignerMessage::LoadWorkoutPressed => {
