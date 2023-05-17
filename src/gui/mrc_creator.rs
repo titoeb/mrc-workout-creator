@@ -1,6 +1,7 @@
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
 use crate::workout_data::workout;
 use iced::executor;
+use iced::subscription;
 use iced::{window, Application, Command, Element, Settings, Theme};
 use rfd::FileDialog;
 use std::fs;
@@ -19,6 +20,7 @@ impl Default for MRCCreator {
 #[derive(Debug, Clone)]
 pub enum WorkoutMessage {
     Design(WorkoutDesignerMessage),
+    IcedEvent(iced::Event),
 }
 
 impl From<WorkoutDesignerMessage> for WorkoutMessage {
@@ -44,11 +46,12 @@ impl Application for MRCCreator {
     fn update(&mut self, message: WorkoutMessage) -> Command<Self::Message> {
         match message {
             WorkoutMessage::Design(WorkoutDesignerMessage::LoadWorkoutPressed) => {
-                self.load_workout_from_file()
+                self.load_workout_from_file();
+                Command::none()
             }
-            _ => self.handle_subpage_messages(message),
-        };
-        Command::none()
+            WorkoutMessage::Design(_) => self.handle_subpage_messages(message),
+            WorkoutMessage::IcedEvent(event) => self.handle_iced_events(event),
+        }
     }
 
     fn view(&self) -> Element<WorkoutMessage> {
@@ -58,6 +61,10 @@ impl Application for MRCCreator {
     }
     fn theme(&self) -> Theme {
         Theme::Dark
+    }
+
+    fn subscription(&self) -> iced::Subscription<Self::Message> {
+        subscription::events().map(WorkoutMessage::IcedEvent)
     }
 }
 
@@ -79,11 +86,22 @@ impl MRCCreator {
         }
     }
 
-    fn handle_subpage_messages(&mut self, message: WorkoutMessage) {
+    fn handle_subpage_messages(&mut self, message: WorkoutMessage) -> Command<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => {
-                let WorkoutMessage::Design(design_message) = message;
-                workout_designer.update(design_message)
+                if let WorkoutMessage::Design(design_message) = message {
+                    workout_designer.update(design_message)
+                } else {
+                    Command::none()
+                }
+            }
+        }
+    }
+
+    fn handle_iced_events(&mut self, event: iced::Event) -> Command<WorkoutMessage> {
+        match self {
+            MRCCreator::WorkoutDesign(workout_designer) => {
+                workout_designer.update(WorkoutDesignerMessage::IcedEvent(event))
             }
         }
     }
