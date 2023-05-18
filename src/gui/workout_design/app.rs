@@ -1,7 +1,7 @@
 use super::elements::EffortUnitInput;
 use crate::gui::mrc_creator::WorkoutMessage;
 use crate::gui::workout_design::elements;
-use crate::gui::workout_design::visualization::Visualizer;
+use crate::gui::workout_design::visualization::core::Visualizer;
 use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
 use iced::keyboard::Event::KeyPressed;
