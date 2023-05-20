@@ -35,10 +35,9 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
         let draw_all = self.cache.draw(bounds.size(), |frame| {
             let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
             frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
-
-            for shapes in &draw_efforts(&bounds, &self.workout.borrow().efforts) {
-                let drawn_shape = shapes.draw();
-                frame.fill(&drawn_shape, Color::from_rgb8(255, 255, 255));
+            for (shape, color) in draw_efforts(&bounds, &self.workout.borrow().efforts) {
+                let drawn_shape = shape.draw();
+                frame.fill(&drawn_shape, color);
             }
         });
 
@@ -46,7 +45,34 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
     }
 }
 
-fn draw_efforts(bounds: &'_ Rectangle, efforts: &[effort::Effort]) -> Vec<Box<dyn Drawable>> {
+fn draw_efforts(
+    bounds: &'_ Rectangle,
+    efforts: &[effort::Effort],
+) -> Vec<(Box<dyn Drawable>, Color)> {
+    compute_shapes_to_draw(bounds, efforts)
+        .into_iter()
+        .zip(duplicate_element_in_iterator(
+            &mut compute_colors_of_shapes(efforts).into_iter(),
+        ))
+        .collect()
+}
+fn compute_colors_of_shapes(efforts: &[effort::Effort]) -> Vec<Color> {
+    efforts.iter().map(|effort| effort.to_color()).collect()
+}
+
+fn duplicate_element_in_iterator<T>(iterator: &mut dyn Iterator<Item = T>) -> Vec<T>
+where
+    T: Clone,
+{
+    iterator
+        .flat_map(|element| vec![element.clone(), element].into_iter())
+        .collect()
+}
+
+fn compute_shapes_to_draw(
+    bounds: &'_ Rectangle,
+    efforts: &[effort::Effort],
+) -> Vec<Box<dyn Drawable>> {
     let durations = efforts
         .iter()
         .map(|effort| effort.duration_in_minutes as f32)
