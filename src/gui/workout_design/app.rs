@@ -10,6 +10,8 @@ use iced::widget::{button, container, Column, Row, Text};
 use iced::widget::{focus_next, focus_previous};
 use iced::Event::Keyboard;
 use iced::{Alignment, Command, Element, Event, Length};
+use iced_native::widget::operation::{Focusable, Operation};
+use iced_native::widget::Id;
 use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
@@ -132,23 +134,7 @@ impl WorkoutDesigner {
                 Command::none()
             }
             WorkoutDesignerMessage::LoadWorkoutPressed => self.load_workout_from_file(),
-            WorkoutDesignerMessage::IcedEvent(event) => {
-                if let Keyboard(key) = event {
-                    match key {
-                        KeyPressed {
-                            key_code: iced::keyboard::KeyCode::Tab,
-                            modifiers: Modifiers::SHIFT,
-                        } => focus_previous::<WorkoutMessage>(),
-                        KeyPressed {
-                            key_code: iced::keyboard::KeyCode::Tab,
-                            modifiers: _,
-                        } => focus_next::<WorkoutMessage>(),
-                        _ => ignore_event(),
-                    }
-                } else {
-                    ignore_event()
-                }
-            }
+            WorkoutDesignerMessage::IcedEvent(event) => handle_keyboard_inputs(event),
             WorkoutDesignerMessage::Effort(index, effort_message) => {
                 self.handle_effort_message(index, effort_message)
             }
@@ -257,4 +243,74 @@ fn get_path_to_json_file(path_to_mrc_file: &path::Path) -> path::PathBuf {
 
 fn ignore_event() -> Command<WorkoutMessage> {
     Command::none()
+}
+
+fn handle_keyboard_inputs(event: Event) -> Command<WorkoutMessage> {
+    if let Keyboard(key) = event {
+        match key {
+            KeyPressed {
+                key_code: iced::keyboard::KeyCode::F1,
+                modifiers: _,
+            } => focus_id::<WorkoutMessage>(0),
+            KeyPressed {
+                key_code: iced::keyboard::KeyCode::F2,
+                modifiers: _,
+            } => focus_id::<WorkoutMessage>(1),
+            KeyPressed {
+                key_code: iced::keyboard::KeyCode::F3,
+                modifiers: _,
+            } => focus_id::<WorkoutMessage>(2),
+            KeyPressed {
+                key_code: iced::keyboard::KeyCode::Tab,
+                modifiers: Modifiers::SHIFT,
+            } => focus_previous::<WorkoutMessage>(),
+            KeyPressed {
+                key_code: iced::keyboard::KeyCode::Tab,
+                modifiers: _,
+            } => focus_next::<WorkoutMessage>(),
+
+            _ => ignore_event(),
+        }
+    } else {
+        ignore_event()
+    }
+}
+
+fn _focus_id<T>(id: usize) -> impl Operation<T> {
+    struct FocusOn {
+        current: usize,
+        to_focus_on: usize,
+    }
+    {
+        impl<T> Operation<T> for FocusOn {
+            fn focusable(&mut self, state: &mut dyn Focusable, _id: Option<&Id>) {
+                if self.current == self.to_focus_on {
+                    state.focus()
+                } else {
+                    state.unfocus()
+                }
+                self.current += 1;
+            }
+
+            fn container(
+                &mut self,
+                _id: Option<&Id>,
+                operate_on_children: &mut dyn FnMut(&mut dyn Operation<T>),
+            ) {
+                operate_on_children(self)
+            }
+        }
+    }
+
+    FocusOn {
+        current: 0,
+        to_focus_on: id,
+    }
+}
+
+pub fn focus_id<Message>(id: usize) -> Command<Message>
+where
+    Message: 'static,
+{
+    Command::widget(_focus_id(id))
 }

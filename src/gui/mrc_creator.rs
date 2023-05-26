@@ -57,7 +57,7 @@ impl Application for MRCCreator {
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
-        subscription::events().map(WorkoutMessage::IcedEvent)
+        subscription::events_with(|event, _| Some(event)).map(WorkoutMessage::IcedEvent)
     }
 }
 
