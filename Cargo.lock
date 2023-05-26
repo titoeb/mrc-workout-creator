@@ -1704,6 +1704,7 @@ dependencies = [
  "async-std",
  "directories-next",
  "iced",
+ "iced_native",
  "rfd",
  "serde",
  "serde_json",
