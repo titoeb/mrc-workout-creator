@@ -1,5 +1,23 @@
 use crate::workout_data::effort::Effort;
+use crate::workout_data::from_mrc;
 use serde::{Deserialize, Serialize};
+
+#[derive(PartialEq, Debug)]
+pub enum ExtractMRCError {
+    Description(from_mrc::ExtractDescriptionError),
+    Efforts(from_mrc::ExtractEffortError),
+}
+impl From<from_mrc::ExtractDescriptionError> for ExtractMRCError {
+    fn from(value: from_mrc::ExtractDescriptionError) -> Self {
+        Self::Description(value)
+    }
+}
+impl From<from_mrc::ExtractEffortError> for ExtractMRCError {
+    fn from(value: from_mrc::ExtractEffortError) -> Self {
+        Self::Efforts(value)
+    }
+}
+
 /// A planed workout.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct Workout {
@@ -101,6 +119,18 @@ impl Workout {
             })
             .sum()
     }
+    pub fn from_mrc(mrc: &str) -> Result<Self, ExtractMRCError> {
+        let description = match from_mrc::extract_description(mrc) {
+            Ok(description) => description,
+            Err(_) => "".to_string(),
+        };
+        let efforts = from_mrc::extract_efforts(mrc)?;
+        Ok(Self {
+            name: String::from(""),
+            description,
+            efforts,
+        })
+    }
 }
 
 pub fn efforts_to_mrc(efforts: &Vec<Effort>, starting_minute: f64) -> (String, f64) {
@@ -138,8 +168,9 @@ pub fn extract_initial_starting_minutes(efforts: &Vec<Effort>, starting_minute: 
 
 #[cfg(test)]
 mod test {
+    use super::*;
     mod workout {
-        use super::super::{Effort, Workout};
+        use super::*;
         use crate::testing::serialize_deserialize;
 
         #[test]
@@ -253,6 +284,107 @@ mod test {
                 ],
             );
             assert_eq!(workout.average_intensity(), 200.0);
+        }
+    }
+    mod from_mrc {
+        use super::*;
+
+        #[test]
+        fn complete_workout() {
+            let workout_as_mrc = "[COURSE HEADER]
+DESCRIPTION = no description
+MINUTES WATTS
+[END COURSE HEADER]
+[COURSE DATA]
+0.00	80.00
+10.00	150.00
+10.00	300.00
+15.00	300.00
+15.00	150.00
+19.00	150.00
+19.00	300.00
+26.00	300.00
+[END COURSE DATA]";
+            let workout = Workout::from_mrc(workout_as_mrc);
+
+            assert_eq!(
+                workout,
+                Ok(Workout::new(
+                    "",
+                    "",
+                    vec![
+                        Effort::new(10.0, 80.0, Some(150.0)),
+                        Effort::new(5.0, 300.0, None),
+                        Effort::new(4.0, 150.0, None),
+                        Effort::new(7.0, 300.0, None),
+                    ],
+                ))
+            );
+        }
+        #[test]
+        fn workout_without_description() {
+            let workout_as_mrc = "[COURSE HEADER]
+DESCRIPTION =
+MINUTES WATTS
+[END COURSE HEADER]
+[COURSE DATA]
+0.00	80.00
+10.00	150.00
+10.00	300.00
+15.00	300.00
+15.00	150.00
+19.00	150.00
+19.00	300.00
+26.00	300.00
+[END COURSE DATA]";
+            let workout = Workout::from_mrc(workout_as_mrc);
+
+            assert_eq!(
+                workout,
+                Ok(Workout::new(
+                    "",
+                    "",
+                    vec![
+                        Effort::new(10.0, 80.0, Some(150.0)),
+                        Effort::new(5.0, 300.0, None),
+                        Effort::new(4.0, 150.0, None),
+                        Effort::new(7.0, 300.0, None),
+                    ],
+                ))
+            );
+        }
+
+        #[test]
+        fn to_mrc_from_mrc() {
+            let workout = Workout::new(
+                "",
+                "Workout for testing",
+                vec![
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(60.0, 150.0, None),
+                ],
+            );
+
+            let reserialized_workout =
+                Workout::from_mrc(&workout.to_mrc()).expect("Simple workout should be loadable");
+            assert_eq!(workout, reserialized_workout)
+        }
+        #[test]
+        fn to_mrc_from_mrc_no_description() {
+            let workout = Workout::new(
+                "",
+                "",
+                vec![
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(300.0, 100.0, None),
+                    Effort::new(60.0, 150.0, None),
+                ],
+            );
+
+            let reserialized_workout =
+                Workout::from_mrc(&workout.to_mrc()).expect("Simple workout should be loadable");
+            assert_eq!(workout, reserialized_workout)
         }
     }
 }
