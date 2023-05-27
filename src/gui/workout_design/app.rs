@@ -76,17 +76,19 @@ impl WorkoutDesigner {
         }
     }
     fn load_workout_from_file(&mut self) -> Command<WorkoutMessage> {
-        if let Some(json_file_to_read) = FileDialog::new()
-            .add_filter("Only Select json files", &["json"])
+        if let Some(mrc_file_to_read) = FileDialog::new()
+            .add_filter("Only Select mrc files", &["mrc"])
             .pick_file()
         {
-            if let Ok(json_to_load) = fs::File::open(json_file_to_read) {
-                if let Ok(loaded_workout) =
-                    serde_json::from_reader::<fs::File, workout::Workout>(json_to_load)
-                {
-                    *self = WorkoutDesigner::from(loaded_workout);
-                } else {
-                    eprintln!("Invalid Json file.")
+            if let Ok(mrc_to_load) = fs::read_to_string(mrc_file_to_read) {
+                match Workout::from_mrc(&mrc_to_load) {
+                    Ok(loaded_workout) => {
+                        *self = WorkoutDesigner::from(loaded_workout);
+                    }
+                    Err(error) => {
+                        eprintln!("Could not read in the MRC file because of:");
+                        eprintln!("{:?}", error);
+                    }
                 }
             }
         }
@@ -121,14 +123,14 @@ impl WorkoutDesigner {
                     .set_directory("~")
                     .save_file()
                 {
-                    if let (Some(mut opened_mrc_file), Some(mut opened_json)) = (
-                        open_or_create(&mrc_file_to_write_to),
-                        open_or_create(&get_path_to_json_file(&mrc_file_to_write_to)),
-                    ) {
-                        let _error_when_writing_mrc_file =
-                            opened_mrc_file.write(self.workout.to_mrc().as_bytes());
-                        let _error_when_writing_json_file = opened_json
-                            .write(serde_json::to_string(&self.workout).unwrap().as_bytes());
+                    if let Some(mut opened_mrc_file) =
+                        open_or_create(&make_it_mrc(mrc_file_to_write_to))
+                    {
+                        if let Err(error) = opened_mrc_file.write(self.workout.to_mrc().as_bytes())
+                        {
+                            eprintln!("Could not write workout because of:");
+                            eprintln!("{}", error);
+                        }
                     }
                 };
                 Command::none()
@@ -237,10 +239,6 @@ fn open_or_create(path_to_file: &path::PathBuf) -> Option<File> {
         .ok()
 }
 
-fn get_path_to_json_file(path_to_mrc_file: &path::Path) -> path::PathBuf {
-    path_to_mrc_file.with_extension("").with_extension("json")
-}
-
 fn ignore_event() -> Command<WorkoutMessage> {
     Command::none()
 }
@@ -313,4 +311,9 @@ where
     Message: 'static,
 {
     Command::widget(_focus_id(id))
+}
+
+fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {
+    path_to_mrc_file.set_extension("mrc");
+    path_to_mrc_file
 }

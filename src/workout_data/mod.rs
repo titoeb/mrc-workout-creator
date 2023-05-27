@@ -4,6 +4,8 @@ pub mod workout;
 /// The individual parts or a workout.
 pub mod effort;
 
+pub mod from_mrc;
+
 pub trait ToMRC {
     fn to_mrc(&self) -> String;
 }
