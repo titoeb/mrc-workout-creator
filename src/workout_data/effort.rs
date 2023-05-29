@@ -1,15 +1,12 @@
 use crate::workout_data::ToMRC;
-use serde::{Deserialize, Serialize};
 
 /// Combining a type of effort with a duration
 /// for which it should be executed.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Effort {
     pub(crate) duration_in_minutes: f64,
     pub(crate) starting_value: f64,
     pub(crate) ending_value: f64,
-
-    #[serde(skip)]
     pub gui_state: EffortState,
 }
 
@@ -116,7 +113,6 @@ mod tests {
     use super::Effort;
     mod effort_unit {
         use super::Effort;
-        use crate::testing::serialize_deserialize;
         use crate::workout_data::workout::{efforts_to_mrc, extract_initial_starting_minutes};
         use crate::workout_data::ToMRC;
 
@@ -182,16 +178,6 @@ mod tests {
                     ),
                     40.0
                 )
-            )
-        }
-
-        #[test]
-        fn test_serialization() {
-            let effort_unit_to_serialize = Effort::new(60.0, 100.0, None);
-
-            assert_eq!(
-                effort_unit_to_serialize,
-                serialize_deserialize(&effort_unit_to_serialize)
             )
         }
     }
