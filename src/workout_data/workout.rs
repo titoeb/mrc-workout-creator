@@ -1,6 +1,5 @@
 use crate::workout_data::effort::Effort;
 use crate::workout_data::from_mrc;
-use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Debug)]
 pub enum ExtractMRCError {
@@ -19,7 +18,7 @@ impl From<from_mrc::ExtractEffortError> for ExtractMRCError {
 }
 
 /// A planed workout.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Workout {
     /// Name of the workout.
     /// The full name of the file will be <name>.mrc.
@@ -171,7 +170,6 @@ mod test {
     use super::*;
     mod workout {
         use super::*;
-        use crate::testing::serialize_deserialize;
 
         #[test]
         fn construct_workout() {
@@ -221,18 +219,6 @@ mod test {
                 5.00\t100.00\n\
                 15.00\t100.00\n\
                 [END COURSE DATA]"
-            )
-        }
-        #[test]
-        fn test_serialization() {
-            let workout_to_test_serialization = Workout::new(
-                "test_workout",
-                "test-1",
-                vec![Effort::new(5.0, 80.0, None), Effort::new(10.0, 100.0, None)],
-            );
-            assert_eq!(
-                workout_to_test_serialization,
-                serialize_deserialize(&workout_to_test_serialization)
             )
         }
         #[test]
