@@ -4,6 +4,7 @@ use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::core::Visualizer;
 use crate::workout_data::workout::Workout;
 use crate::workout_data::{effort, workout};
+use dirs::home_dir;
 use iced::keyboard::Event::KeyPressed;
 use iced::keyboard::Modifiers;
 use iced::widget::{button, container, Column, Row, Text};
@@ -16,6 +17,7 @@ use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use std::path;
 
@@ -77,6 +79,7 @@ impl WorkoutDesigner {
     }
     fn load_workout_from_file(&mut self) -> Command<WorkoutMessage> {
         if let Some(mrc_file_to_read) = FileDialog::new()
+            .set_directory(path_or_home_directory(find_bike_computer()))
             .add_filter("Only Select mrc files", &["mrc"])
             .pick_file()
         {
@@ -119,8 +122,8 @@ impl WorkoutDesigner {
             }
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(mrc_file_to_write_to) = FileDialog::new()
+                    .set_directory(path_or_home_directory(find_bike_computer()))
                     .add_filter("Only Select mrc files", &["mrc"])
-                    .set_directory("~")
                     .save_file()
                 {
                     if let Some(mut opened_mrc_file) =
@@ -316,4 +319,67 @@ where
 fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {
     path_to_mrc_file.set_extension("mrc");
     path_to_mrc_file
+}
+
+fn find_bike_computer() -> Option<PathBuf> {
+    let mut potential_bike_computer: Vec<PathBuf> = list_all_mounted_devices()
+        .unwrap_or(vec![])
+        .into_iter()
+        .filter(|path| is_relevant_computer(path))
+        .collect();
+    match potential_bike_computer.len() {
+        0 => None,
+        _ => Some(
+            potential_bike_computer
+                .pop()
+                .expect("Because of match it has at least one entry.")
+                .join(Path::new("Internal shared storage/plans")),
+        ),
+    }
+}
+
+fn list_all_mounted_devices() -> Option<Vec<PathBuf>> {
+    // Only works for linux right now:
+    let potential_location = Path::new("/run/user/1000/gvfs/");
+    if !potential_location.exists() {
+        return None;
+    }
+    fs::read_dir(potential_location)
+        .ok()?
+        .map(|file| match file {
+            Ok(file) => Some(file.path()),
+            Err(_) => None,
+        })
+        .collect()
+}
+
+fn is_relevant_computer(path: &Path) -> bool {
+    all_top_level_directories_exist(path)
+}
+
+fn all_top_level_directories_exist(path: &Path) -> bool {
+    path.join(Path::new("Internal shared storage/exports"))
+        .exists()
+        && path
+            .join(Path::new("Internal shared storage/factory"))
+            .exists()
+        && path
+            .join(Path::new("Internal shared storage/gnss"))
+            .exists()
+        && path
+            .join(Path::new("Internal shared storage/plans"))
+            .exists()
+        && path
+            .join(Path::new("Internal shared storage/logs"))
+            .exists()
+        && path
+            .join(Path::new("Internal shared storage/maps"))
+            .exists()
+        && path
+            .join(Path::new("Internal shared storage/routes"))
+            .exists()
+}
+
+fn path_or_home_directory(path: Option<PathBuf>) -> PathBuf {
+    path.unwrap_or(home_dir().unwrap_or(PathBuf::new()))
 }
