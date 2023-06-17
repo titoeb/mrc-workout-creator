@@ -163,9 +163,7 @@ impl<'a> workout::Workout {
         container::Container::new(
             Column::new()
                 .spacing(20)
-                .push(WhiteText::new(String::from(
-                    "Minutes   |   Starting-value | Ending Value\n",
-                )))
+                .push(effort_string_headers())
                 .push(scrollable(
                     self.efforts.iter().enumerate().fold(
                         Column::new(),
@@ -190,13 +188,11 @@ impl<'a> effort::Effort {
         match &self.gui_state {
             effort::EffortState::Idle => Row::new()
                 .spacing(5)
-                .push(
-                    Row::new()
-                        .spacing(10)
-                        .push(WhiteText::new(self.duration_in_minutes.to_mrc()))
-                        .push(WhiteText::new(self.starting_value.to_mrc()))
-                        .push(WhiteText::new(self.ending_value.to_mrc())),
-                )
+                .push(effort_string_row(
+                    self.duration_in_minutes.to_mrc(),
+                    self.starting_value.to_mrc(),
+                    self.ending_value.to_mrc(),
+                ))
                 .push(Button::new(text("Delete")).on_press(WorkoutMessage::Design(
                     WorkoutDesignerMessage::Effort(effort_index, EffortMessage::Delete),
                 )))
@@ -264,8 +260,38 @@ impl WhiteText<'_> {
     }
 }
 
+fn effort_string_text<'a>(white_text: String) -> WhiteText<'a> {
+    WhiteText {
+        text: text(white_text)
+            .size(25)
+            .width(90)
+            .horizontal_alignment(iced_native::alignment::Horizontal::Center),
+    }
+}
+
 impl<'a> From<WhiteText<'a>> for Element<'a, WorkoutMessage> {
     fn from(white_text: WhiteText<'a>) -> Self {
         white_text.text.into()
     }
+}
+
+fn effort_string_headers<'a>() -> Row<'a, WorkoutMessage> {
+    effort_string_row(
+        String::from("Minutes"),
+        String::from("Start"),
+        String::from("End"),
+    )
+}
+
+fn effort_string_row<'a>(
+    first_value: String,
+    second_value: String,
+    third_value: String,
+) -> Row<'a, WorkoutMessage> {
+    Row::new()
+        .push(effort_string_text(first_value))
+        .push(effort_string_text(second_value))
+        .push(effort_string_text(third_value))
+        .align_items(Alignment::Start)
+        .width(300)
 }
