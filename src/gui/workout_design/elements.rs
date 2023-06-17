@@ -277,7 +277,7 @@ impl<'a> From<WhiteText<'a>> for Element<'a, WorkoutMessage> {
 
 fn effort_string_headers<'a>() -> Row<'a, WorkoutMessage> {
     effort_string_row(
-        String::from("Minutes"),
+        String::from("Duration"),
         String::from("Start"),
         String::from("End"),
     )
