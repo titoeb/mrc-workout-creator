@@ -100,21 +100,21 @@ impl EffortUnitInput {
         Row::new()
             .spacing(10)
             .push(
-                text_input::TextInput::new("Duration", &self.duration.value)
+                text_input::TextInput::new("Duration in Minutes", &self.duration.value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
                     .on_input(self.on_duration_change),
             )
             .push(
-                text_input::TextInput::new("Starting Value", &self.effort.starting_value)
+                text_input::TextInput::new("Starting Wattage", &self.effort.starting_value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
                     .on_input(self.on_starting_value_change),
             )
             .push(
-                text_input::TextInput::new("Ending Value", &self.effort.ending_value)
+                text_input::TextInput::new("Ending Wattage", &self.effort.ending_value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
