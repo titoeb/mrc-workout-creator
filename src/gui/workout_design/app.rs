@@ -207,8 +207,7 @@ impl WorkoutDesigner {
     fn display_workout_and_buttons(&self) -> Column<'_, WorkoutMessage> {
         Column::new()
             .push(self.workout.view())
-            .push(self.visualize_export_button())
-            .push(self.visualize_load_button())
+            .push(self.show_buttons())
             .width(Length::FillPortion(1))
             .spacing(20)
             .align_items(Alignment::Center)
@@ -226,6 +225,12 @@ impl WorkoutDesigner {
                 WorkoutDesignerMessage::LoadWorkoutPressed,
             ))
             .width(Length::Fixed(120.0))
+    }
+    fn show_buttons(&self) -> Row<'_, WorkoutMessage> {
+        Row::new()
+            .push(self.visualize_load_button())
+            .push(self.visualize_export_button())
+            .spacing(10)
     }
 }
 
