@@ -205,6 +205,7 @@ impl<'a> effort::Effort {
                 duration_in_minutes,
             } => Row::new()
                 .spacing(5)
+                .width(300)
                 .push(
                     TextInput::new("", duration_in_minutes)
                         .on_input(move |updated_effort_in_minutes| {
@@ -216,7 +217,9 @@ impl<'a> effort::Effort {
                         .on_submit(WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
                             effort_index,
                             EffortMessage::ModificationDone,
-                        ))),
+                        )))
+                        .width(90)
+                        .size(25),
                 )
                 .push(
                     TextInput::new("", starting_value)
@@ -229,7 +232,9 @@ impl<'a> effort::Effort {
                         .on_submit(WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
                             effort_index,
                             EffortMessage::ModificationDone,
-                        ))),
+                        )))
+                        .width(90)
+                        .size(25),
                 )
                 .push(
                     TextInput::new("", ending_value)
@@ -242,7 +247,9 @@ impl<'a> effort::Effort {
                         .on_submit(WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
                             effort_index,
                             EffortMessage::ModificationDone,
-                        ))),
+                        )))
+                        .width(90)
+                        .size(25),
                 ),
         }
     }
