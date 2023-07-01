@@ -1,5 +1,6 @@
 use super::elements::EffortUnitInput;
 use crate::gui::mrc_creator::WorkoutMessage;
+use crate::gui::style::pink_button;
 use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::core::Visualizer;
 use crate::workout_data::workout::Workout;
@@ -7,7 +8,7 @@ use crate::workout_data::{effort, workout};
 use dirs::home_dir;
 use iced::keyboard::Event::KeyPressed;
 use iced::keyboard::Modifiers;
-use iced::widget::{button, container, Column, Row, Text};
+use iced::widget::{button, container, Column, Row};
 use iced::widget::{focus_next, focus_previous};
 use iced::Event::Keyboard;
 use iced::{Alignment, Command, Element, Event, Length};
@@ -213,14 +214,14 @@ impl WorkoutDesigner {
             .align_items(Alignment::Center)
     }
     fn visualize_export_button(&self) -> button::Button<'_, WorkoutMessage> {
-        button::Button::new(Text::new("Export Workout"))
+        pink_button("Export Workout")
             .on_press(WorkoutMessage::from(
                 WorkoutDesignerMessage::ExportButtonPressed,
             ))
             .width(Length::Fixed(120.0))
     }
     fn visualize_load_button(&self) -> button::Button<'_, WorkoutMessage> {
-        button::Button::new(Text::new("Load existing Workout"))
+        pink_button("Load existing Workout")
             .on_press(WorkoutMessage::from(
                 WorkoutDesignerMessage::LoadWorkoutPressed,
             ))

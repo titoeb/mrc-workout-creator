@@ -1,3 +1,4 @@
+use crate::gui::style;
 use crate::workout_data::workout;
 use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::widget::canvas;
@@ -35,10 +36,18 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
         let draw_all = self.cache.draw(bounds.size(), |frame| {
             let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
             frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
+
             for (shape, color) in draw_efforts(&bounds, &self.workout.borrow().efforts) {
                 let drawn_shape = shape.draw();
                 frame.fill(&drawn_shape, color);
             }
+
+            frame.stroke(
+                &canvas::Path::rectangle(Point::ORIGIN, frame.size()),
+                canvas::Stroke::default()
+                    .with_color(style::PURPLE)
+                    .with_width(3.0),
+            );
         });
 
         vec![draw_all]
