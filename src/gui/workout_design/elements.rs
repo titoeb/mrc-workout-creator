@@ -2,9 +2,10 @@ use std::num::ParseFloatError;
 
 use super::app::{EffortMessage, WorkoutDesignerMessage};
 use crate::gui::mrc_creator::WorkoutMessage;
+use crate::gui::style::{pink_button, pink_text_input, WhiteText};
 use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
-use iced::widget::{container, scrollable, text, text_input, Button, Column, Row, Text, TextInput};
+use iced::widget::{container, scrollable, Column, Row, TextInput};
 use iced::{Alignment, Element};
 
 #[derive(Debug, Clone)]
@@ -100,21 +101,21 @@ impl EffortUnitInput {
         Row::new()
             .spacing(10)
             .push(
-                text_input::TextInput::new("Duration in Minutes", &self.duration.value)
+                pink_text_input("Duration in Minutes", &self.duration.value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
                     .on_input(self.on_duration_change),
             )
             .push(
-                text_input::TextInput::new("Starting Wattage", &self.effort.starting_value)
+                pink_text_input("Starting Wattage", &self.effort.starting_value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
                     .on_input(self.on_starting_value_change),
             )
             .push(
-                text_input::TextInput::new("Ending Wattage", &self.effort.ending_value)
+                pink_text_input("Ending Wattage", &self.effort.ending_value)
                     .padding(self.padding)
                     .size(self.size)
                     .on_submit(self.creation_message.clone())
@@ -193,10 +194,10 @@ impl<'a> effort::Effort {
                     self.starting_value.to_mrc(),
                     self.ending_value.to_mrc(),
                 ))
-                .push(Button::new(text("Delete")).on_press(WorkoutMessage::Design(
+                .push(pink_button("Delete").on_press(WorkoutMessage::Design(
                     WorkoutDesignerMessage::Effort(effort_index, EffortMessage::Delete),
                 )))
-                .push(Button::new(text("Edit")).on_press(WorkoutMessage::Design(
+                .push(pink_button("Edit").on_press(WorkoutMessage::Design(
                     WorkoutDesignerMessage::Effort(effort_index, EffortMessage::Edit),
                 ))),
             effort::EffortState::Editing {
@@ -255,31 +256,10 @@ impl<'a> effort::Effort {
     }
 }
 
-struct WhiteText<'a> {
-    text: Text<'a>,
-}
-
-impl WhiteText<'_> {
-    fn new(white_text: String) -> Self {
-        Self {
-            text: text(white_text).size(25),
-        }
-    }
-}
-
 fn effort_string_text<'a>(white_text: String) -> WhiteText<'a> {
-    WhiteText {
-        text: text(white_text)
-            .size(25)
-            .width(90)
-            .horizontal_alignment(iced_native::alignment::Horizontal::Center),
-    }
-}
-
-impl<'a> From<WhiteText<'a>> for Element<'a, WorkoutMessage> {
-    fn from(white_text: WhiteText<'a>) -> Self {
-        white_text.text.into()
-    }
+    WhiteText::new(white_text)
+        .width(90)
+        .horizontal_alignment(iced_native::alignment::Horizontal::Center)
 }
 
 fn effort_string_headers<'a>() -> Row<'a, WorkoutMessage> {
