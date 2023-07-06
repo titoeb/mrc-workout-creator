@@ -6,6 +6,8 @@ use iced::{
 };
 use iced_native::{Background, Color, Vector};
 
+pub const TEXT_SIZE: f32 = 25.0;
+
 pub const PINK: Color = Color {
     r: 1.0,
     g: 0.0,
