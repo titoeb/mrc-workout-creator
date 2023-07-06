@@ -37,6 +37,12 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
             draw_backround(frame);
             draw_efforts(frame, bounds, &self.workout.borrow().efforts);
             draw_pink_border(frame);
+            draw_summary_statistic(
+                frame,
+                &bounds,
+                self.workout.borrow().average_intensity(),
+                self.workout.borrow().total_time_of_workout(),
+            )
         });
 
         vec![draw_all]
@@ -60,6 +66,42 @@ fn draw_pink_border(frame: &mut canvas::Frame) {
             .with_color(style::PURPLE)
             .with_width(3.0),
     );
+}
+fn draw_summary_statistic(
+    frame: &mut canvas::Frame,
+    bounds: &'_ Rectangle,
+    average_intensity: f64,
+    duration_in_minutes: f64,
+) {
+    let text_size_with_buffer = style::TEXT_SIZE * 1.25;
+    let offset_from_left: f32 = bounds.width * 0.85;
+
+    frame.fill_text(pink_text(
+        format!("Average Wattage: {:.1}", average_intensity),
+        Point {
+            x: offset_from_left,
+            y: text_size_with_buffer,
+        },
+    ));
+    frame.fill_text(pink_text(
+        format!("Duration: {} ", duration_in_minutes),
+        Point {
+            x: offset_from_left,
+            y: 2.0 * text_size_with_buffer,
+        },
+    ));
+}
+
+fn pink_text(text: String, position: iced::Point) -> canvas::Text {
+    canvas::Text {
+        content: text,
+        position,
+        color: style::PINK,
+        size: style::TEXT_SIZE,
+        font: iced::Font::default(),
+        horizontal_alignment: iced_native::alignment::Horizontal::Center,
+        vertical_alignment: iced_native::alignment::Vertical::Center,
+    }
 }
 
 fn compute_boxes_for_efforts(
@@ -198,7 +240,7 @@ fn compute_starting_dimensions_y(
     offset_between_efforts: f32,
     max: f32,
 ) -> Vec<RectangleYDimensions> {
-    let ratio_effort_to_frame = ((length_of_frame * 0.95) - offset_between_efforts) / max;
+    let ratio_effort_to_frame = ((length_of_frame * 0.90) - offset_between_efforts) / max;
     let heigths = efforts
         .iter()
         .map(|&current_effort| current_effort * ratio_effort_to_frame);
