@@ -34,27 +34,35 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
         _cursor: canvas::Cursor,
     ) -> Vec<canvas::Geometry> {
         let draw_all = self.cache.draw(bounds.size(), |frame| {
-            let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
-            frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
-
-            for (shape, color) in draw_efforts(&bounds, &self.workout.borrow().efforts) {
-                let drawn_shape = shape.draw();
-                frame.fill(&drawn_shape, color);
-            }
-
-            frame.stroke(
-                &canvas::Path::rectangle(Point::ORIGIN, frame.size()),
-                canvas::Stroke::default()
-                    .with_color(style::PURPLE)
-                    .with_width(3.0),
-            );
+            draw_backround(frame);
+            draw_efforts(frame, bounds, &self.workout.borrow().efforts);
+            draw_pink_border(frame);
         });
 
         vec![draw_all]
     }
 }
 
-fn draw_efforts(
+fn draw_backround(frame: &mut canvas::Frame) {
+    let background = canvas::Path::rectangle(Point::ORIGIN, frame.size());
+    frame.fill(&background, Color::from_rgb8(0x40, 0x44, 0x4B));
+}
+fn draw_efforts(frame: &mut canvas::Frame, bounds: Rectangle, efforts: &[effort::Effort]) {
+    for (shape, color) in compute_boxes_for_efforts(&bounds, efforts) {
+        let drawn_shape = shape.draw();
+        frame.fill(&drawn_shape, color);
+    }
+}
+fn draw_pink_border(frame: &mut canvas::Frame) {
+    frame.stroke(
+        &canvas::Path::rectangle(Point::ORIGIN, frame.size()),
+        canvas::Stroke::default()
+            .with_color(style::PURPLE)
+            .with_width(3.0),
+    );
+}
+
+fn compute_boxes_for_efforts(
     bounds: &'_ Rectangle,
     efforts: &[effort::Effort],
 ) -> Vec<(Box<dyn Drawable>, Color)> {
