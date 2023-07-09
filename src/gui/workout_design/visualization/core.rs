@@ -243,7 +243,7 @@ fn compute_starting_dimensions_y(
     let ratio_effort_to_frame = ((length_of_frame * 0.90) - offset_between_efforts) / max;
     let heigths = efforts
         .iter()
-        .map(|&current_effort| current_effort * ratio_effort_to_frame);
+        .map(|&current_effort| current_effort * dbg!(ratio_effort_to_frame));
 
     let starting_points_y = vec![offset_between_efforts; efforts.len()].into_iter();
 
@@ -435,12 +435,13 @@ mod test {
     #[test]
     fn test_get_starting_coordinates_y() {
         assert_eq!(
-            compute_starting_dimensions_y(100.0, vec![100.0, 200.0, 250.0, 100.0], 0.1, 250.0),
+            compute_starting_dimensions_y(278.888_9, vec![100.0, 200.0, 250.0, 100.0], 1.0, 250.0),
+            // TODO: Make comparison round.
             vec![
-                RectangleYDimensions::new(0.1, 37.960003),
-                RectangleYDimensions::new(0.1, 75.920006),
-                RectangleYDimensions::new(0.1, 94.9),
-                RectangleYDimensions::new(0.1, 37.960003)
+                RectangleYDimensions::new(1.0, 99.99999),
+                RectangleYDimensions::new(1.0, 199.99998),
+                RectangleYDimensions::new(1.0, 249.99998),
+                RectangleYDimensions::new(1.0, 99.99999)
             ]
         )
     }

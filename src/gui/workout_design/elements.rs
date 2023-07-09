@@ -159,8 +159,6 @@ pub(super) fn base_design<'a>() -> Column<'a, WorkoutMessage> {
 
 impl<'a> workout::Workout {
     pub fn view(&'a self) -> impl Into<Element<'a, WorkoutMessage>> {
-        let workout_duration = self.workout_duration();
-        let average_intensity = self.average_intensity();
         container::Container::new(
             Column::new()
                 .spacing(20)
@@ -172,14 +170,7 @@ impl<'a> workout::Workout {
                             scrollable.push(effort.view(effort_index))
                         },
                     ),
-                ))
-                .push(WhiteText::new(
-                    format!("Duration: {:.1}", workout_duration,),
-                ))
-                .push(WhiteText::new(format!(
-                    "Average Intensity: {:.1}",
-                    average_intensity,
-                ))),
+                )),
         )
     }
 }
