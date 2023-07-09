@@ -243,7 +243,7 @@ fn compute_starting_dimensions_y(
     let ratio_effort_to_frame = ((length_of_frame * 0.90) - offset_between_efforts) / max;
     let heigths = efforts
         .iter()
-        .map(|&current_effort| current_effort * dbg!(ratio_effort_to_frame));
+        .map(|&current_effort| current_effort * ratio_effort_to_frame);
 
     let starting_points_y = vec![offset_between_efforts; efforts.len()].into_iter();
 
