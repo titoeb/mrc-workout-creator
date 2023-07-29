@@ -2,6 +2,7 @@ use std::num::ParseFloatError;
 
 use super::app::{EffortMessage, WorkoutDesignerMessage};
 use crate::gui::mrc_creator::WorkoutMessage;
+use crate::gui::style;
 use crate::gui::style::{pink_button, pink_text_input, WhiteText};
 use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
@@ -185,12 +186,18 @@ impl<'a> effort::Effort {
                     self.starting_value.to_mrc(),
                     self.ending_value.to_mrc(),
                 ))
-                .push(pink_button("Delete").on_press(WorkoutMessage::Design(
-                    WorkoutDesignerMessage::Effort(effort_index, EffortMessage::Delete),
-                )))
-                .push(pink_button("Edit").on_press(WorkoutMessage::Design(
-                    WorkoutDesignerMessage::Effort(effort_index, EffortMessage::Edit),
-                ))),
+                .push(pink_button("Delete").width(style::SMALL_BUTTON).on_press(
+                    WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
+                        effort_index,
+                        EffortMessage::Delete,
+                    )),
+                ))
+                .push(pink_button("Edit").width(style::SMALL_BUTTON).on_press(
+                    WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
+                        effort_index,
+                        EffortMessage::Edit,
+                    )),
+                )),
             effort::EffortState::Editing {
                 starting_value,
                 ending_value,
@@ -250,7 +257,7 @@ impl<'a> effort::Effort {
 fn effort_string_text<'a>(white_text: String) -> WhiteText<'a> {
     WhiteText::new(white_text)
         .width(90)
-        .horizontal_alignment(iced_native::alignment::Horizontal::Center)
+        .horizontal_alignment(iced::alignment::Horizontal::Center)
 }
 
 fn effort_string_headers<'a>() -> Row<'a, WorkoutMessage> {

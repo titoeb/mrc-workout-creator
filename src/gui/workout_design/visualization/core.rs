@@ -2,7 +2,8 @@ use crate::gui::style;
 use crate::workout_data::workout;
 use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::widget::canvas;
-use iced::{Color, Element, Length, Point, Rectangle, Size, Theme};
+use iced::widget::text::Shaping;
+use iced::{Color, Element, Length, Point, Rectangle, Renderer, Size, Theme};
 use std::cell::RefCell;
 #[derive(Default)]
 pub struct Visualizer {
@@ -29,11 +30,12 @@ impl canvas::Program<WorkoutMessage> for &Visualizer {
     fn draw(
         &self,
         _state: &Self::State,
+        renderer: &Renderer,
         _theme: &Theme,
         bounds: Rectangle,
-        _cursor: canvas::Cursor,
+        _cursor: iced::mouse::Cursor,
     ) -> Vec<canvas::Geometry> {
-        let draw_all = self.cache.draw(bounds.size(), |frame| {
+        let draw_all = self.cache.draw(renderer, bounds.size(), |frame| {
             draw_backround(frame);
             draw_efforts(frame, bounds, &self.workout.borrow().efforts);
             draw_pink_border(frame);
@@ -99,8 +101,10 @@ fn pink_text(text: String, position: iced::Point) -> canvas::Text {
         color: style::PINK,
         size: style::TEXT_SIZE,
         font: iced::Font::default(),
-        horizontal_alignment: iced_native::alignment::Horizontal::Center,
-        vertical_alignment: iced_native::alignment::Vertical::Center,
+        line_height: iced::widget::text::LineHeight::default(),
+        shaping: Shaping::Basic,
+        horizontal_alignment: iced::alignment::Horizontal::Center,
+        vertical_alignment: iced::alignment::Vertical::Center,
     }
 }
 

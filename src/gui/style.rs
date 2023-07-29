@@ -4,9 +4,12 @@ use iced::{
     widget::{button, text, text_input, Text},
     Element,
 };
-use iced_native::{Background, Color, Vector};
+use iced::{Background, Color, Vector};
+use iced_core::Length;
 
-pub const TEXT_SIZE: f32 = 25.0;
+pub const TEXT_SIZE: f32 = 22.0;
+pub const LARGE_BUTTON: Length = Length::Fixed(150.0);
+pub const SMALL_BUTTON: Length = Length::Fixed(70.0);
 
 pub const PINK: Color = Color {
     r: 1.0,
@@ -47,7 +50,7 @@ impl button::StyleSheet for PinkRetroButton {
         button::Appearance {
             shadow_offset: Vector::default(),
             background: Some(Background::Color(PINK)),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 0.0,
             border_color: Color::TRANSPARENT,
             text_color: Color::BLACK,
@@ -60,7 +63,7 @@ impl button::StyleSheet for PinkRetroButton {
         button::Appearance {
             border_color: PURPLE,
             border_width: 5.0,
-            border_radius: 5.0,
+            border_radius: 5.0.into(),
             ..self.active(style)
         }
     }
@@ -74,8 +77,14 @@ impl button::StyleSheet for PinkRetroButton {
 }
 
 pub(crate) fn pink_button(text: &str) -> button::Button<'_, WorkoutMessage> {
-    button::Button::new(Text::new(text))
-        .style(iced::theme::Button::Custom(Box::new(PinkRetroButton {})))
+    button::Button::new(
+        Text::new(text)
+            .size(20.0)
+            .horizontal_alignment(iced_core::alignment::Horizontal::Center)
+            .vertical_alignment(iced_core::alignment::Vertical::Center),
+    )
+    .style(iced::theme::Button::Custom(Box::new(PinkRetroButton {})))
+    .width(LARGE_BUTTON)
 }
 
 struct RetroPinkTextInput {}
@@ -85,7 +94,7 @@ impl text_input::StyleSheet for RetroPinkTextInput {
     fn active(&self, _style: &Self::Style) -> text_input::Appearance {
         text_input::Appearance {
             background: EXTENDED_DARK.background.base.color.into(),
-            border_radius: 2.0,
+            border_radius: 2.0.into(),
             border_width: 1.0,
             border_color: PINK,
             icon_color: WHITE,
@@ -139,7 +148,7 @@ impl WhiteText<'_> {
     pub fn new(white_text: String) -> Self {
         Self {
             text: text(white_text)
-                .size(25)
+                .size(TEXT_SIZE)
                 .style(iced::theme::Text::Color(WHITE)),
         }
     }
