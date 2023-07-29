@@ -12,8 +12,11 @@ use iced::widget::{button, container, Column, Row};
 use iced::widget::{focus_next, focus_previous};
 use iced::Event::Keyboard;
 use iced::{Alignment, Command, Element, Event, Length};
-use iced_native::widget::operation::{Focusable, Operation};
-use iced_native::widget::Id;
+use iced_core::widget::{
+    operation::{Focusable, Operation},
+    Id,
+};
+use iced_core::Rectangle;
 use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
@@ -214,18 +217,14 @@ impl WorkoutDesigner {
             .align_items(Alignment::Center)
     }
     fn visualize_export_button(&self) -> button::Button<'_, WorkoutMessage> {
-        pink_button("Export Workout")
-            .on_press(WorkoutMessage::from(
-                WorkoutDesignerMessage::ExportButtonPressed,
-            ))
-            .width(Length::Fixed(120.0))
+        pink_button("Export Workout").on_press(WorkoutMessage::from(
+            WorkoutDesignerMessage::ExportButtonPressed,
+        ))
     }
     fn visualize_load_button(&self) -> button::Button<'_, WorkoutMessage> {
-        pink_button("Load existing Workout")
-            .on_press(WorkoutMessage::from(
-                WorkoutDesignerMessage::LoadWorkoutPressed,
-            ))
-            .width(Length::Fixed(120.0))
+        pink_button("Load existing Workout").on_press(WorkoutMessage::from(
+            WorkoutDesignerMessage::LoadWorkoutPressed,
+        ))
     }
     fn show_buttons(&self) -> Row<'_, WorkoutMessage> {
         Row::new()
@@ -302,6 +301,7 @@ fn _focus_id<T>(id: usize) -> impl Operation<T> {
             fn container(
                 &mut self,
                 _id: Option<&Id>,
+                _bounds: Rectangle,
                 operate_on_children: &mut dyn FnMut(&mut dyn Operation<T>),
             ) {
                 operate_on_children(self)

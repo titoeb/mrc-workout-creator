@@ -97,17 +97,15 @@ where
             resizable: true,
             decorations: true,
             transparent: true,
-            always_on_top: false,
             visible: true,
+            level: window::Level::AlwaysOnTop,
             platform_specific: window::PlatformSpecific::default(),
             icon: None,
         },
         flags: Default::default(),
         default_font: Default::default(),
         default_text_size: 20.0,
-        text_multithreading: false,
         antialiasing: false,
         exit_on_close_request: true,
-        try_opengles_first: false,
     }
 }
