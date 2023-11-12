@@ -11,15 +11,15 @@ version = "0.5.1"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dirs = "5.0.1"
-iced = {version = "0.10.0", features = ["async-std", "debug", "canvas"]}
-iced_core = "0.10.0"
-iced_native = {version = "0.10.3"}
-regex = "1.9.0"
-rfd = "0.11.4"
+dirs = "5.0"
+iced = {version = "0.10", features = ["async-std", "debug", "canvas"]}
+iced_core = "0.10"
+iced_native = {version = "0.10"}
+regex = "1.10"
+rfd = "0.12"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-async-std = "1.0"
+async-std = "1.12"
 directories-next = "2.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
