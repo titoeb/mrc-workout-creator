@@ -159,8 +159,7 @@ fn compute_shapes_to_draw(
                 starting_values.clone(),
                 offset_between_durations,
                 starting_values.iter().chain(ending_values.iter()).copied().fold(f32::NAN, f32::max)
-            )
-            .into_iter(),
+            ),
         )
         .zip(
             compute_starting_dimensions_y(
@@ -168,8 +167,7 @@ fn compute_shapes_to_draw(
                 ending_values.clone(),
                 offset_between_durations,
                 starting_values.iter().chain(ending_values.iter()).copied().fold(f32::NAN, f32::max)
-            )
-            .into_iter(),
+            ),
         )
         .flat_map(
             |((x_dimensions, y_dimensions_starting), y_dimensions_ending)| -> Vec<Box<dyn Drawable+'static>>{

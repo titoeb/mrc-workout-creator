@@ -329,7 +329,7 @@ fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {
 
 fn find_bike_computer() -> Option<PathBuf> {
     let mut potential_bike_computer: Vec<PathBuf> = list_all_mounted_devices()
-        .unwrap_or(vec![])
+        .unwrap_or_default()
         .into_iter()
         .filter(|path| is_relevant_computer(path))
         .collect();
@@ -387,5 +387,5 @@ fn all_top_level_directories_exist(path: &Path) -> bool {
 }
 
 fn path_or_home_directory(path: Option<PathBuf>) -> PathBuf {
-    path.unwrap_or(home_dir().unwrap_or(PathBuf::new()))
+    path.unwrap_or(home_dir().unwrap_or_default())
 }

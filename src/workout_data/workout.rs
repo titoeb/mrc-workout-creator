@@ -136,7 +136,7 @@ pub fn efforts_to_mrc(efforts: &Vec<Effort>, starting_minute: f64) -> (String, f
     let starting_minutes = extract_initial_starting_minutes(efforts, starting_minute);
     let effort_string_with_final_minute = efforts
         .iter()
-        .zip(starting_minutes.into_iter())
+        .zip(starting_minutes)
         .map(|(effort, starting_minute)| effort.to_mrc(starting_minute))
         .collect::<Vec<(String, f64)>>();
 
