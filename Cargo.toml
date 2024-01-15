@@ -16,7 +16,7 @@ iced = {version = "0.10", features = ["async-std", "debug", "canvas"]}
 iced_core = "0.10"
 iced_native = {version = "0.10"}
 regex = "1.10"
-rfd = "0.12"
+rfd = "0.13"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 async-std = "1.12"
