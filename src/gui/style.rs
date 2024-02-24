@@ -5,7 +5,7 @@ use iced::{
     Element,
 };
 use iced::{Background, Color, Vector};
-use iced_core::Length;
+use iced_core::{Border, Length};
 
 pub const TEXT_SIZE: f32 = 22.0;
 pub const LARGE_BUTTON: Length = Length::Fixed(150.0);
@@ -50,10 +50,13 @@ impl button::StyleSheet for PinkRetroButton {
         button::Appearance {
             shadow_offset: Vector::default(),
             background: Some(Background::Color(PINK)),
-            border_radius: 0.0.into(),
-            border_width: 0.0,
-            border_color: Color::TRANSPARENT,
+            border: Border {
+                radius: 0.0.into(),
+                width: 0.0,
+                color: Color::TRANSPARENT,
+            },
             text_color: Color::BLACK,
+            ..button::Appearance::default()
         }
     }
     fn disabled(&self, _style: &Self::Style) -> button::Appearance {
@@ -61,9 +64,11 @@ impl button::StyleSheet for PinkRetroButton {
     }
     fn hovered(&self, style: &Self::Style) -> button::Appearance {
         button::Appearance {
-            border_color: PURPLE,
-            border_width: 5.0,
-            border_radius: 5.0.into(),
+            border: Border {
+                color: PURPLE,
+                width: 5.0,
+                radius: 5.0.into(),
+            },
             ..self.active(style)
         }
     }
@@ -87,6 +92,14 @@ pub(crate) fn pink_button(text: &str) -> button::Button<'_, WorkoutMessage> {
     .width(LARGE_BUTTON)
 }
 
+fn active_border() -> Border {
+    Border {
+        radius: 2.0.into(),
+        width: 1.0,
+        color: PINK,
+    }
+}
+
 struct RetroPinkTextInput {}
 
 impl text_input::StyleSheet for RetroPinkTextInput {
@@ -94,9 +107,7 @@ impl text_input::StyleSheet for RetroPinkTextInput {
     fn active(&self, _style: &Self::Style) -> text_input::Appearance {
         text_input::Appearance {
             background: EXTENDED_DARK.background.base.color.into(),
-            border_radius: 2.0.into(),
-            border_width: 1.0,
-            border_color: PINK,
+            border: active_border(),
             icon_color: WHITE,
         }
     }
@@ -107,13 +118,19 @@ impl text_input::StyleSheet for RetroPinkTextInput {
     }
     fn focused(&self, style: &Self::Style) -> text_input::Appearance {
         text_input::Appearance {
-            border_color: PURPLE,
+            border: Border {
+                color: PURPLE,
+                ..active_border()
+            },
             ..self.active(style)
         }
     }
     fn hovered(&self, style: &Self::Style) -> text_input::Appearance {
         text_input::Appearance {
-            border_color: PURPLE,
+            border: Border {
+                color: PURPLE,
+                ..active_border()
+            },
             ..self.active(style)
         }
     }
