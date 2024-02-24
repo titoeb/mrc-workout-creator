@@ -1,8 +1,9 @@
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
+use iced::event::listen_with;
 use iced::executor;
-use iced::subscription;
+use iced::window::settings::PlatformSpecific;
 use iced::{window, Application, Command, Element, Settings, Theme};
-
+use iced_core::Size;
 /// Holding the state of the overall CRMCreator Application.
 pub enum MRCCreator {
     WorkoutDesign(WorkoutDesigner),
@@ -57,7 +58,7 @@ impl Application for MRCCreator {
     }
 
     fn subscription(&self) -> iced::Subscription<Self::Message> {
-        subscription::events_with(|event, _| Some(event)).map(WorkoutMessage::IcedEvent)
+        listen_with(|event, _| Some(event)).map(WorkoutMessage::IcedEvent)
     }
 }
 
@@ -90,7 +91,10 @@ where
     Settings {
         id: None,
         window: window::Settings {
-            size: (1400, 800),
+            size: Size {
+                width: 1400.0,
+                height: 800.0,
+            },
             position: window::Position::default(),
             min_size: None,
             max_size: None,
@@ -99,13 +103,14 @@ where
             transparent: true,
             visible: true,
             level: window::Level::AlwaysOnTop,
-            platform_specific: window::PlatformSpecific::default(),
+            platform_specific: PlatformSpecific::default(),
             icon: None,
+            exit_on_close_request: true,
         },
         flags: Default::default(),
         default_font: Default::default(),
-        default_text_size: 20.0,
+        default_text_size: iced::Pixels(20.0),
         antialiasing: false,
-        exit_on_close_request: true,
+        ..Settings::default()
     }
 }

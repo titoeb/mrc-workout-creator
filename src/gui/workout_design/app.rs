@@ -17,7 +17,6 @@ use iced_core::widget::{
     Id,
 };
 use iced_core::Rectangle;
-use iced_native;
 use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
