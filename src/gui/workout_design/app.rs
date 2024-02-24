@@ -17,6 +17,7 @@ use iced_core::widget::{
     Id,
 };
 use iced_core::Rectangle;
+use iced_native;
 use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
@@ -255,24 +256,29 @@ fn handle_keyboard_inputs(event: Event) -> Command<WorkoutMessage> {
     if let Keyboard(key) = event {
         match key {
             KeyPressed {
-                key_code: iced::keyboard::KeyCode::F1,
+                key: iced_core::keyboard::Key::Named(iced::keyboard::key::Named::F1),
                 modifiers: _,
+                ..
             } => focus_id::<WorkoutMessage>(0),
             KeyPressed {
-                key_code: iced::keyboard::KeyCode::F2,
+                key: iced_core::keyboard::Key::Named(iced::keyboard::key::Named::F2),
                 modifiers: _,
+                ..
             } => focus_id::<WorkoutMessage>(1),
             KeyPressed {
-                key_code: iced::keyboard::KeyCode::F3,
+                key: iced_core::keyboard::Key::Named(iced::keyboard::key::Named::F3),
                 modifiers: _,
+                ..
             } => focus_id::<WorkoutMessage>(2),
             KeyPressed {
-                key_code: iced::keyboard::KeyCode::Tab,
+                key: iced_core::keyboard::Key::Named(iced::keyboard::key::Named::Tab),
                 modifiers: Modifiers::SHIFT,
+                ..
             } => focus_previous::<WorkoutMessage>(),
             KeyPressed {
-                key_code: iced::keyboard::KeyCode::Tab,
+                key: iced_core::keyboard::Key::Named(iced::keyboard::key::Named::Tab),
                 modifiers: _,
+                ..
             } => focus_next::<WorkoutMessage>(),
 
             _ => ignore_event(),
