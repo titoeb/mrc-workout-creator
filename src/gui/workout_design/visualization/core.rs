@@ -214,7 +214,7 @@ fn compute_starting_dimensions_x(
 fn compute_ratio_of_duration_to_frame(
     length_of_frame: f32,
     offset_between_durations: f32,
-    durations: &Vec<f32>,
+    durations: &[f32],
 ) -> f32 {
     (length_of_frame - (offset_between_durations * durations.len() as f32))
         / durations.iter().sum::<f32>()
