@@ -99,7 +99,7 @@ fn pink_text(text: String, position: iced::Point) -> canvas::Text {
         content: text,
         position,
         color: style::PINK,
-        size: style::TEXT_SIZE,
+        size: iced::Pixels(style::TEXT_SIZE),
         font: iced::Font::default(),
         line_height: iced::widget::text::LineHeight::default(),
         shaping: Shaping::Basic,
