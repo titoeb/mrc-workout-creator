@@ -217,14 +217,20 @@ impl WorkoutDesigner {
             .align_items(Alignment::Center)
     }
     fn visualize_export_button(&self) -> button::Button<'_, WorkoutMessage> {
-        pink_button("Export Workout").on_press(WorkoutMessage::from(
-            WorkoutDesignerMessage::ExportButtonPressed,
-        ))
+        pink_button("Export Workout")
+            .width(170.0)
+            .height(60.0)
+            .on_press(WorkoutMessage::from(
+                WorkoutDesignerMessage::ExportButtonPressed,
+            ))
     }
     fn visualize_load_button(&self) -> button::Button<'_, WorkoutMessage> {
-        pink_button("Load existing Workout").on_press(WorkoutMessage::from(
-            WorkoutDesignerMessage::LoadWorkoutPressed,
-        ))
+        pink_button("Load existing Workout")
+            .width(170.0)
+            .height(60.0)
+            .on_press(WorkoutMessage::from(
+                WorkoutDesignerMessage::LoadWorkoutPressed,
+            ))
     }
     fn show_buttons(&self) -> Row<'_, WorkoutMessage> {
         Row::new()

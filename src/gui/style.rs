@@ -1,15 +1,15 @@
 use crate::gui::mrc_creator::WorkoutMessage;
 use iced::theme::palette::EXTENDED_DARK;
 use iced::{
-    widget::{button, text, text_input, Text},
+    widget::{button, text_input, Text},
     Element,
 };
-use iced::{Background, Color, Vector};
+use iced::{Background, Color, Font, Vector};
 use iced_core::{Border, Length};
 
 pub const TEXT_SIZE: f32 = 22.0;
 pub const LARGE_BUTTON: Length = Length::Fixed(150.0);
-pub const SMALL_BUTTON: Length = Length::Fixed(70.0);
+pub const SMALL_BUTTON: f32 = 70.0;
 
 pub const PINK: Color = Color {
     r: 1.0,
@@ -41,6 +41,17 @@ pub const LIGHT_WHITE: Color = Color {
     b: 1.0,
     a: 0.08,
 };
+
+pub fn default_font() -> Font {
+    Font {
+        family: iced::font::Family::Monospace,
+        ..Default::default()
+    }
+}
+
+pub fn text_with_default_font<'a>(text: String) -> Text<'a> {
+    Text::new(text).font(default_font())
+}
 
 struct PinkRetroButton {}
 
@@ -83,10 +94,10 @@ impl button::StyleSheet for PinkRetroButton {
 
 pub(crate) fn pink_button(text: &str) -> button::Button<'_, WorkoutMessage> {
     button::Button::new(
-        Text::new(text)
-            .size(20.0)
+        text_with_default_font(String::from(text))
+            .size(19.0)
             .horizontal_alignment(iced_core::alignment::Horizontal::Center)
-            .vertical_alignment(iced_core::alignment::Vertical::Center),
+            .vertical_alignment(iced_core::alignment::Vertical::Top),
     )
     .style(iced::theme::Button::Custom(Box::new(PinkRetroButton {})))
     .width(LARGE_BUTTON)
@@ -152,9 +163,11 @@ pub fn pink_text_input<'a>(
     placeholder: &'a str,
     value: &'a str,
 ) -> text_input::TextInput<'a, WorkoutMessage> {
-    text_input::TextInput::new(placeholder, value).style(iced::theme::TextInput::Custom(Box::new(
-        RetroPinkTextInput {},
-    )))
+    text_input::TextInput::new(placeholder, value)
+        .font(default_font())
+        .style(iced::theme::TextInput::Custom(Box::new(
+            RetroPinkTextInput {},
+        )))
 }
 
 pub struct WhiteText<'a> {
@@ -164,7 +177,7 @@ pub struct WhiteText<'a> {
 impl WhiteText<'_> {
     pub fn new(white_text: String) -> Self {
         Self {
-            text: text(white_text)
+            text: text_with_default_font(white_text)
                 .size(TEXT_SIZE)
                 .style(iced::theme::Text::Color(WHITE)),
         }

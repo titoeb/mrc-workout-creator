@@ -1,4 +1,4 @@
-use crate::gui::style;
+use crate::gui::style::{self, default_font};
 use crate::workout_data::workout;
 use crate::{gui::mrc_creator::WorkoutMessage, workout_data::effort};
 use iced::widget::canvas;
@@ -76,7 +76,7 @@ fn draw_summary_statistic(
     duration_in_minutes: f64,
 ) {
     let text_size_with_buffer = style::TEXT_SIZE * 1.25;
-    let offset_from_left: f32 = bounds.width * 0.85;
+    let offset_from_left: f32 = bounds.width * 0.82;
 
     frame.fill_text(pink_text(
         format!("Average Wattage: {:.1}", average_intensity),
@@ -100,7 +100,7 @@ fn pink_text(text: String, position: iced::Point) -> canvas::Text {
         position,
         color: style::PINK,
         size: iced::Pixels(style::TEXT_SIZE),
-        font: iced::Font::default(),
+        font: default_font(),
         line_height: iced::widget::text::LineHeight::default(),
         shaping: Shaping::Basic,
         horizontal_alignment: iced::alignment::Horizontal::Center,
