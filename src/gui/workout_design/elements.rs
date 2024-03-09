@@ -2,7 +2,7 @@ use std::num::ParseFloatError;
 
 use super::app::{EffortMessage, WorkoutDesignerMessage};
 use crate::gui::mrc_creator::WorkoutMessage;
-use crate::gui::style;
+use crate::gui::style::{self, SMALL_BUTTON};
 use crate::gui::style::{pink_button, pink_text_input, WhiteText};
 use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
@@ -192,7 +192,7 @@ impl<'a> effort::Effort {
                         EffortMessage::Delete,
                     )),
                 ))
-                .push(pink_button("Edit").width(style::SMALL_BUTTON).on_press(
+                .push(pink_button("Edit").width(SMALL_BUTTON * 0.75).on_press(
                     WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
                         effort_index,
                         EffortMessage::Edit,
@@ -256,7 +256,7 @@ impl<'a> effort::Effort {
 
 fn effort_string_text<'a>(white_text: String) -> WhiteText<'a> {
     WhiteText::new(white_text)
-        .width(90)
+        .width(100)
         .horizontal_alignment(iced::alignment::Horizontal::Center)
 }
 
