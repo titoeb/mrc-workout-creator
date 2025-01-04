@@ -1,6 +1,6 @@
 use super::elements::EffortUnitInput;
 use crate::gui::mrc_creator::WorkoutMessage;
-use crate::gui::style::pink_button;
+use crate::gui::style::{pink_button, LARGE_BUTTON};
 use crate::gui::workout_design::elements;
 use crate::gui::workout_design::visualization::core::Visualizer;
 use crate::workout_data::workout::Workout;
@@ -11,12 +11,13 @@ use iced::keyboard::Modifiers;
 use iced::widget::{button, container, Column, Row};
 use iced::widget::{focus_next, focus_previous};
 use iced::Event::Keyboard;
-use iced::{Alignment, Command, Element, Event, Length};
+use iced::{Element, Event, Length, Task};
 use iced_core::widget::{
     operation::{Focusable, Operation},
     Id,
 };
 use iced_core::Rectangle;
+use iced_runtime::task::widget;
 use rfd::FileDialog;
 use std::fs;
 use std::fs::{remove_file, File, OpenOptions};
@@ -81,7 +82,7 @@ impl WorkoutDesigner {
             visualizer: Visualizer::default(),
         }
     }
-    fn load_workout_from_file(&mut self) -> Command<WorkoutMessage> {
+    fn load_workout_from_file(&mut self) -> Task<WorkoutMessage> {
         if let Some(mrc_file_to_read) = FileDialog::new()
             .set_directory(path_or_home_directory(find_bike_computer()))
             .add_filter("Only Select mrc files", &["mrc"])
@@ -99,21 +100,21 @@ impl WorkoutDesigner {
                 }
             }
         }
-        Command::none()
+        Task::none()
     }
-    pub fn update(&mut self, message: WorkoutDesignerMessage) -> Command<WorkoutMessage> {
+    pub fn update(&mut self, message: WorkoutDesignerMessage) -> Task<WorkoutMessage> {
         match message {
             WorkoutDesignerMessage::EffortUnitStartingValueChanged(value) => {
                 self.effort_unit_input.set_starting_value(value);
-                Command::none()
+                Task::none()
             }
             WorkoutDesignerMessage::EffortUnitEndingValueChanged(value) => {
                 self.effort_unit_input.set_ending_value(value);
-                Command::none()
+                Task::none()
             }
             WorkoutDesignerMessage::EffortUnitInputDurationChanged(value) => {
                 self.effort_unit_input.set_duration(value);
-                Command::none()
+                Task::none()
             }
             WorkoutDesignerMessage::CreateTask => {
                 if !self.effort_unit_input.is_empty() {
@@ -122,7 +123,7 @@ impl WorkoutDesigner {
                         self.effort_unit_input.clear();
                     }
                 }
-                Command::none()
+                Task::none()
             }
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(mrc_file_to_write_to) = FileDialog::new()
@@ -140,7 +141,7 @@ impl WorkoutDesigner {
                         }
                     }
                 };
-                Command::none()
+                Task::none()
             }
             WorkoutDesignerMessage::LoadWorkoutPressed => self.load_workout_from_file(),
             WorkoutDesignerMessage::IcedEvent(event) => handle_keyboard_inputs(event),
@@ -153,31 +154,31 @@ impl WorkoutDesigner {
         &mut self,
         index: usize,
         effort_message: EffortMessage,
-    ) -> Command<WorkoutMessage> {
+    ) -> Task<WorkoutMessage> {
         match effort_message {
             EffortMessage::Delete => {
                 self.workout.remove(index);
-                Command::none()
+                Task::none()
             }
             EffortMessage::Edit => {
                 self.workout.to_edit(index);
-                Command::none()
+                Task::none()
             }
             EffortMessage::ModificationDone => {
                 self.workout.to_idle(index);
-                Command::none()
+                Task::none()
             }
             EffortMessage::UpdateDurationInMinutes(updated_duration_in_minutes) => {
                 self.workout.efforts[index].update_duration_of_effort(updated_duration_in_minutes);
-                Command::none()
+                Task::none()
             }
             EffortMessage::UpdateStartingValue(updated_value) => {
                 self.workout.efforts[index].update_starting_value(updated_value);
-                Command::none()
+                Task::none()
             }
             EffortMessage::UpdateEndingValue(updated_value) => {
                 self.workout.efforts[index].update_ending_value(updated_value);
-                Command::none()
+                Task::none()
             }
         }
     }
@@ -186,8 +187,8 @@ impl WorkoutDesigner {
         container(self.elements())
             .width(Length::Fill)
             .height(Length::Fill)
-            .center_x()
-            .center_y()
+            .center_x(Length::Fill)
+            .center_y(Length::Fill)
             .into()
     }
 
@@ -214,20 +215,20 @@ impl WorkoutDesigner {
             .push(self.show_buttons())
             .width(Length::FillPortion(1))
             .spacing(20)
-            .align_items(Alignment::Center)
+            .align_x(iced::Alignment::Center)
     }
     fn visualize_export_button(&self) -> button::Button<'_, WorkoutMessage> {
         pink_button("Export Workout")
-            .width(170.0)
             .height(60.0)
+            .width(LARGE_BUTTON)
             .on_press(WorkoutMessage::from(
                 WorkoutDesignerMessage::ExportButtonPressed,
             ))
     }
     fn visualize_load_button(&self) -> button::Button<'_, WorkoutMessage> {
-        pink_button("Load existing Workout")
-            .width(170.0)
+        pink_button("Load Workout")
             .height(60.0)
+            .width(LARGE_BUTTON)
             .on_press(WorkoutMessage::from(
                 WorkoutDesignerMessage::LoadWorkoutPressed,
             ))
@@ -248,16 +249,17 @@ fn open_or_create(path_to_file: &path::PathBuf) -> Option<File> {
         .read(true)
         .write(true)
         .create(true)
+        .truncate(false)
         .append(false)
         .open(path_to_file)
         .ok()
 }
 
-fn ignore_event() -> Command<WorkoutMessage> {
-    Command::none()
+fn ignore_event() -> Task<WorkoutMessage> {
+    Task::none()
 }
 
-fn handle_keyboard_inputs(event: Event) -> Command<WorkoutMessage> {
+fn handle_keyboard_inputs(event: Event) -> Task<WorkoutMessage> {
     if let Keyboard(key) = event {
         match key {
             KeyPressed {
@@ -326,11 +328,11 @@ fn _focus_id<T>(id: usize) -> impl Operation<T> {
     }
 }
 
-pub fn focus_id<Message>(id: usize) -> Command<Message>
+pub fn focus_id<Message>(id: usize) -> Task<WorkoutMessage>
 where
     Message: 'static,
 {
-    Command::widget(_focus_id(id))
+    widget(_focus_id(id))
 }
 
 fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {

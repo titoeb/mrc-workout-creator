@@ -4,12 +4,12 @@ use iced::{
     widget::{button, text_input, Text},
     Element,
 };
-use iced::{Background, Color, Font, Vector};
+use iced::{Background, Color, Font, Theme};
 use iced_core::{Border, Length};
 
 pub const TEXT_SIZE: f32 = 22.0;
-pub const LARGE_BUTTON: Length = Length::Fixed(150.0);
-pub const SMALL_BUTTON: f32 = 70.0;
+pub const LARGE_BUTTON: Length = Length::Fixed(180.0);
+pub const SMALL_BUTTON: f32 = 90.0;
 
 pub const PINK: Color = Color {
     r: 1.0,
@@ -54,12 +54,18 @@ pub fn text_with_default_font<'a>(text: String) -> Text<'a> {
 }
 
 struct PinkRetroButton {}
-
-impl button::StyleSheet for PinkRetroButton {
-    type Style = iced::Theme;
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            shadow_offset: Vector::default(),
+impl PinkRetroButton {
+    pub fn style(_theme: &Theme, status: button::Status) -> button::Style {
+        match status {
+            button::Status::Active => PinkRetroButton::active(),
+            button::Status::Pressed => PinkRetroButton::pressed(),
+            button::Status::Hovered => PinkRetroButton::hovered(),
+            button::Status::Disabled => PinkRetroButton::disabled(),
+        }
+    }
+    fn active() -> button::Style {
+        button::Style {
+            // shadow_offset: Vector::default(),
             background: Some(Background::Color(PINK)),
             border: Border {
                 radius: 0.0.into(),
@@ -67,27 +73,27 @@ impl button::StyleSheet for PinkRetroButton {
                 color: Color::TRANSPARENT,
             },
             text_color: Color::BLACK,
-            ..button::Appearance::default()
+            ..button::Style::default()
         }
     }
-    fn disabled(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance::default()
+    fn disabled() -> button::Style {
+        button::Style::default()
     }
-    fn hovered(&self, style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+    fn hovered() -> button::Style {
+        button::Style {
             border: Border {
                 color: PURPLE,
                 width: 5.0,
                 radius: 5.0.into(),
             },
-            ..self.active(style)
+            ..PinkRetroButton::active()
         }
     }
-    fn pressed(&self, style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            shadow_offset: Vector { x: 5.0, y: 5.0 },
+    fn pressed() -> button::Style {
+        button::Style {
+            // shadow_offset: Vector { x: 5.0, y: 5.0 },
             background: Some(Background::Color(PURPLE)),
-            ..self.active(style)
+            ..PinkRetroButton::active()
         }
     }
 }
@@ -96,11 +102,10 @@ pub(crate) fn pink_button(text: &str) -> button::Button<'_, WorkoutMessage> {
     button::Button::new(
         text_with_default_font(String::from(text))
             .size(19.0)
-            .horizontal_alignment(iced_core::alignment::Horizontal::Center)
-            .vertical_alignment(iced_core::alignment::Vertical::Top),
+            .align_x(iced_core::alignment::Horizontal::Center)
+            .align_y(iced_core::alignment::Vertical::Center),
     )
-    .style(iced::theme::Button::Custom(Box::new(PinkRetroButton {})))
-    .width(LARGE_BUTTON)
+    .style(PinkRetroButton::style)
 }
 
 fn active_border() -> Border {
@@ -111,50 +116,58 @@ fn active_border() -> Border {
     }
 }
 
-struct RetroPinkTextInput {}
+struct PinkRetroTextInput {}
 
-impl text_input::StyleSheet for RetroPinkTextInput {
-    type Style = iced::Theme;
-    fn active(&self, _style: &Self::Style) -> text_input::Appearance {
-        text_input::Appearance {
+impl PinkRetroTextInput {
+    pub fn style(_theme: &Theme, status: text_input::Status) -> text_input::Style {
+        match status {
+            text_input::Status::Active => PinkRetroTextInput::active(),
+            text_input::Status::Focused => PinkRetroTextInput::focused(),
+            text_input::Status::Hovered => PinkRetroTextInput::hovered(),
+            text_input::Status::Disabled => PinkRetroTextInput::disabled(),
+        }
+    }
+
+    fn active() -> text_input::Style {
+        text_input::Style {
             background: EXTENDED_DARK.background.base.color.into(),
             border: active_border(),
-            icon_color: WHITE,
+            icon: WHITE,
+            placeholder: PinkRetroTextInput::placeholder_color(),
+            value: PinkRetroTextInput::value_color(),
+            selection: PinkRetroTextInput::selection_color(),
         }
     }
-    fn disabled(&self, style: &Self::Style) -> text_input::Appearance {
-        text_input::Appearance {
-            ..self.active(style)
+    fn disabled() -> text_input::Style {
+        text_input::Style {
+            ..PinkRetroTextInput::active()
         }
     }
-    fn focused(&self, style: &Self::Style) -> text_input::Appearance {
-        text_input::Appearance {
+    fn focused() -> text_input::Style {
+        text_input::Style {
             border: Border {
                 color: PURPLE,
                 ..active_border()
             },
-            ..self.active(style)
+            ..PinkRetroTextInput::active()
         }
     }
-    fn hovered(&self, style: &Self::Style) -> text_input::Appearance {
-        text_input::Appearance {
+    fn hovered() -> text_input::Style {
+        text_input::Style {
             border: Border {
                 color: PURPLE,
                 ..active_border()
             },
-            ..self.active(style)
+            ..PinkRetroTextInput::active()
         }
     }
-    fn disabled_color(&self, _style: &Self::Style) -> Color {
-        GRAY
-    }
-    fn placeholder_color(&self, _style: &Self::Style) -> Color {
+    fn placeholder_color() -> Color {
         LIGHT_WHITE
     }
-    fn selection_color(&self, _style: &Self::Style) -> Color {
+    fn selection_color() -> Color {
         GRAY
     }
-    fn value_color(&self, _style: &Self::Style) -> Color {
+    fn value_color() -> Color {
         WHITE
     }
 }
@@ -165,9 +178,7 @@ pub fn pink_text_input<'a>(
 ) -> text_input::TextInput<'a, WorkoutMessage> {
     text_input::TextInput::new(placeholder, value)
         .font(default_font())
-        .style(iced::theme::TextInput::Custom(Box::new(
-            RetroPinkTextInput {},
-        )))
+        .style(PinkRetroTextInput::style)
 }
 
 pub struct WhiteText<'a> {
@@ -179,7 +190,7 @@ impl WhiteText<'_> {
         Self {
             text: text_with_default_font(white_text)
                 .size(TEXT_SIZE)
-                .style(iced::theme::Text::Color(WHITE)),
+                .color(WHITE),
         }
     }
     pub fn width(self, new_width: u16) -> Self {
@@ -187,9 +198,9 @@ impl WhiteText<'_> {
             text: self.text.width(new_width),
         }
     }
-    pub fn horizontal_alignment(self, alignement: iced::alignment::Horizontal) -> Self {
+    pub fn align_x(self, alignement: iced::alignment::Horizontal) -> Self {
         Self {
-            text: self.text.horizontal_alignment(alignement),
+            text: self.text.align_x(alignement),
         }
     }
 }

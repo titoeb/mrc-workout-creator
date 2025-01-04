@@ -153,7 +153,7 @@ impl TryFrom<EffortUnitInput> for effort::Effort {
 
 pub(super) fn base_design<'a>() -> Column<'a, WorkoutMessage> {
     Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .padding(10)
         .spacing(30)
 }
@@ -180,24 +180,28 @@ impl<'a> effort::Effort {
     fn view(&'a self, effort_index: usize) -> impl Into<Element<'a, WorkoutMessage>> {
         match &self.gui_state {
             effort::EffortState::Idle => Row::new()
-                .spacing(5)
+                .spacing(15)
                 .push(effort_string_row(
                     self.duration_in_minutes.to_mrc(),
                     self.starting_value.to_mrc(),
                     self.ending_value.to_mrc(),
                 ))
-                .push(pink_button("Delete").width(style::SMALL_BUTTON).on_press(
-                    WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
-                        effort_index,
-                        EffortMessage::Delete,
-                    )),
-                ))
-                .push(pink_button("Edit").width(SMALL_BUTTON * 0.75).on_press(
-                    WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
-                        effort_index,
-                        EffortMessage::Edit,
-                    )),
-                )),
+                .push(
+                    Row::new()
+                        .spacing(5)
+                        .push(pink_button("Delete").width(style::SMALL_BUTTON).on_press(
+                            WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
+                                effort_index,
+                                EffortMessage::Delete,
+                            )),
+                        ))
+                        .push(pink_button("Edit").width(SMALL_BUTTON * 0.75).on_press(
+                            WorkoutMessage::Design(WorkoutDesignerMessage::Effort(
+                                effort_index,
+                                EffortMessage::Edit,
+                            )),
+                        )),
+                ),
             effort::EffortState::Editing {
                 starting_value,
                 ending_value,
@@ -256,8 +260,8 @@ impl<'a> effort::Effort {
 
 fn effort_string_text<'a>(white_text: String) -> WhiteText<'a> {
     WhiteText::new(white_text)
-        .width(100)
-        .horizontal_alignment(iced::alignment::Horizontal::Center)
+        .width(110)
+        .align_x(iced::alignment::Horizontal::Center)
 }
 
 fn effort_string_headers<'a>() -> Row<'a, WorkoutMessage> {
@@ -277,6 +281,6 @@ fn effort_string_row<'a>(
         .push(effort_string_text(first_value))
         .push(effort_string_text(second_value))
         .push(effort_string_text(third_value))
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .width(300)
 }

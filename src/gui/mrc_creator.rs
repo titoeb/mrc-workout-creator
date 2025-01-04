@@ -1,8 +1,8 @@
 use crate::gui::workout_design::app::{WorkoutDesigner, WorkoutDesignerMessage};
 use iced::event::listen_with;
-use iced::executor;
 use iced::window::settings::PlatformSpecific;
-use iced::{window, Application, Command, Element, Settings, Theme};
+use iced::Task;
+use iced::{window, Element, Settings, Theme};
 use iced_core::Size;
 /// Holding the state of the overall CRMCreator Application.
 pub enum MRCCreator {
@@ -27,55 +27,46 @@ impl From<WorkoutDesignerMessage> for WorkoutMessage {
     }
 }
 
-impl Application for MRCCreator {
-    type Message = WorkoutMessage;
-    type Executor = executor::Default;
-    type Flags = ();
-    type Theme = Theme;
-
-    fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        (Self::default(), Command::none())
+impl MRCCreator {
+    pub fn new() -> (Self, Task<WorkoutMessage>) {
+        (Self::default(), Task::none())
     }
 
-    fn title(&self) -> String {
-        String::from("Workout Generator")
-    }
-
-    fn update(&mut self, message: WorkoutMessage) -> Command<Self::Message> {
+    pub fn update(&mut self, message: WorkoutMessage) -> Task<WorkoutMessage> {
         match message {
             WorkoutMessage::Design(_) => self.handle_subpage_messages(message),
             WorkoutMessage::IcedEvent(event) => self.handle_iced_events(event),
         }
     }
 
-    fn view(&self) -> Element<WorkoutMessage> {
+    pub fn view(&self) -> Element<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
         }
     }
-    fn theme(&self) -> Theme {
+    pub fn theme(&self) -> Theme {
         Theme::Dark
     }
 
-    fn subscription(&self) -> iced::Subscription<Self::Message> {
-        listen_with(|event, _| Some(event)).map(WorkoutMessage::IcedEvent)
+    pub fn subscription(&self) -> iced::Subscription<WorkoutMessage> {
+        listen_with(|event, _, _| Some(event)).map(WorkoutMessage::IcedEvent)
     }
 }
 
 impl MRCCreator {
-    fn handle_subpage_messages(&mut self, message: WorkoutMessage) -> Command<WorkoutMessage> {
+    fn handle_subpage_messages(&mut self, message: WorkoutMessage) -> Task<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => {
                 if let WorkoutMessage::Design(design_message) = message {
                     workout_designer.update(design_message)
                 } else {
-                    Command::none()
+                    Task::none()
                 }
             }
         }
     }
 
-    fn handle_iced_events(&mut self, event: iced::Event) -> Command<WorkoutMessage> {
+    fn handle_iced_events(&mut self, event: iced::Event) -> Task<WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => {
                 workout_designer.update(WorkoutDesignerMessage::IcedEvent(event))
@@ -84,33 +75,30 @@ impl MRCCreator {
     }
 }
 
-pub fn settings<Flags>() -> Settings<Flags>
-where
-    Flags: Default,
-{
+pub fn settings() -> Settings {
     Settings {
-        id: None,
-        window: window::Settings {
-            size: Size {
-                width: 1400.0,
-                height: 800.0,
-            },
-            position: window::Position::default(),
-            min_size: None,
-            max_size: None,
-            resizable: true,
-            decorations: true,
-            transparent: true,
-            visible: true,
-            level: window::Level::AlwaysOnTop,
-            platform_specific: PlatformSpecific::default(),
-            icon: None,
-            exit_on_close_request: true,
-        },
-        flags: Default::default(),
-        default_font: Default::default(),
         default_text_size: iced::Pixels(20.0),
         antialiasing: false,
         ..Settings::default()
+    }
+}
+
+pub fn window_settings() -> window::settings::Settings {
+    window::Settings {
+        size: Size {
+            width: 1550.0,
+            height: 800.0,
+        },
+        position: window::Position::default(),
+        min_size: None,
+        max_size: None,
+        resizable: true,
+        decorations: true,
+        transparent: true,
+        visible: true,
+        level: window::Level::AlwaysOnTop,
+        platform_specific: PlatformSpecific::default(),
+        icon: None,
+        exit_on_close_request: true,
     }
 }
