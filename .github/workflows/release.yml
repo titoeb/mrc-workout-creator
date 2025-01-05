@@ -17,7 +17,7 @@ jobs:
       - name: Setup ubuntu
         run: sudo apt-get install build-essential libgtk-3-dev
       - name: Extract Version number.
-        run: head -n 3 Cargo.toml  | tail -n 1 | cut -c 12- | rev | cut -c 2- | rev > version.txt
+        run: cargo pkgid | awk -F'#' '{print $2}' > version.txt
       - name: Read in Version number.
         id: version_number
         uses: juliangruber/read-file-action@v1
