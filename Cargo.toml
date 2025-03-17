@@ -19,7 +19,7 @@ regex = "1.11"
 rfd = "0.15"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-async-std = "1.12"
+async-std = "1.13"
 directories-next = "2.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
