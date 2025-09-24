@@ -39,7 +39,7 @@ impl MRCCreator {
         }
     }
 
-    pub fn view(&self) -> Element<WorkoutMessage> {
+    pub fn view(&'_ self) -> Element<'_, WorkoutMessage> {
         match self {
             MRCCreator::WorkoutDesign(workout_designer) => workout_designer.view(),
         }
