@@ -183,7 +183,7 @@ impl WorkoutDesigner {
         }
     }
 
-    pub fn view(&self) -> Element<WorkoutMessage> {
+    pub fn view(&'_ self) -> Element<'_, WorkoutMessage> {
         container(self.elements())
             .width(Length::Fill)
             .height(Length::Fill)
