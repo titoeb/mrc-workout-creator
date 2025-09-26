@@ -341,10 +341,10 @@ fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {
 }
 
 fn find_bike_computer() -> Option<PathBuf> {
-    let mut potential_bike_computer: Vec<PathBuf> = list_all_mounted_devices()
+    let mut potential_bike_computer: Vec<PathBuf> = dbg!(list_all_mounted_devices())
         .unwrap_or_default()
         .into_iter()
-        .filter(|path| is_relevant_computer(path))
+        .filter(|path| dbg!(is_relevant_computer(path)))
         .collect();
     match potential_bike_computer.len() {
         0 => None,
@@ -381,9 +381,6 @@ fn all_top_level_directories_exist(path: &Path) -> bool {
         .exists()
         && path
             .join(Path::new("Internal shared storage/factory"))
-            .exists()
-        && path
-            .join(Path::new("Internal shared storage/gnss"))
             .exists()
         && path
             .join(Path::new("Internal shared storage/plans"))
