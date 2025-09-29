@@ -138,21 +138,21 @@ impl WorkoutDesigner {
                 Task::none()
             }
             WorkoutDesignerMessage::ExportButtonPressed => {
-                if let Some(mrc_file_to_write_to) = FileDialog::new()
+                if let Some(file_to_write_to) = FileDialog::new()
                     .set_directory(path_or_home_directory(find_bike_computer()))
                     .add_filter("MRC or Plan Files", &["mrc", "plan"])
                     .save_file()
                 {
-                    let mrc_file_to_write_to = &make_it_plan_if_none(mrc_file_to_write_to);
-                    if let Some(mut opened_mrc_file) = open_or_create(mrc_file_to_write_to) {
+                    let file_to_write_to = &make_it_plan_if_none(file_to_write_to);
+                    if let Some(mut opened_file) = open_or_create(file_to_write_to) {
                         if let Some(file_contents) =
-                            match mrc_file_to_write_to.extension().and_then(|e| e.to_str()) {
+                            match file_to_write_to.extension().and_then(|e| e.to_str()) {
                                 Some("plan") => Some(self.workout.to_plan_format()),
                                 Some("mrc") => Some(self.workout.to_mrc()),
                                 Some(_) | None => None,
                             }
                         {
-                            if let Err(error) = opened_mrc_file.write(file_contents.as_bytes()) {
+                            if let Err(error) = opened_file.write(file_contents.as_bytes()) {
                                 eprintln!("Could not write workout because of:");
                                 eprintln!("{}", error);
                             }
@@ -361,7 +361,7 @@ fn make_it_plan_if_none(mut path_to_workout_file: path::PathBuf) -> path::PathBu
 }
 
 fn find_bike_computer() -> Option<PathBuf> {
-    let mut potential_bike_computer: Vec<PathBuf> = dbg!(list_all_mounted_devices())
+    let mut potential_bike_computer: Vec<PathBuf> = list_all_mounted_devices()
         .unwrap_or_default()
         .into_iter()
         .filter(|path| is_relevant_computer(path))

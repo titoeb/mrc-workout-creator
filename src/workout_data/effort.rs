@@ -2,10 +2,10 @@ use crate::workout_data::ToMRC;
 
 const SPLITTING_THRESHOLD_IN_MINUTES: f64 = 0.2;
 
-fn is_ramp_effort(effort: &Effort) -> bool {
+pub fn is_ramp_effort(effort: &Effort) -> bool {
     effort.starting_value != effort.ending_value
 }
-fn effort_can_be_split(effort: &Effort) -> bool {
+pub fn effort_can_be_split(effort: &Effort) -> bool {
     effort.duration_in_minutes > SPLITTING_THRESHOLD_IN_MINUTES
 }
 /// Combining a type of effort with a duration
@@ -45,27 +45,6 @@ impl Effort {
             gui_state: EffortState::default(),
         }
     }
-    // TODO: It would be better to have a seperate class `RampEffort` for this.
-    pub fn to_mrc_for_ramp_effort(&self, starting_minute: f64) -> String {
-        self.split_ramp_effort_into_constant_chunks()
-            .iter()
-            .fold(
-                (String::new(), starting_minute),
-                |(mrc_representation, starting_minute), effort| {
-                    let (mrc_representation_of_effort, starting_minute) =
-                        effort.to_mrc(starting_minute);
-                    (
-                        if mrc_representation.is_empty() {
-                            mrc_representation_of_effort
-                        } else {
-                            format!("{}\n{}", mrc_representation, mrc_representation_of_effort)
-                        },
-                        starting_minute,
-                    )
-                },
-            )
-            .0
-    }
     pub fn split_ramp_effort_into_constant_chunks(&self) -> Vec<Effort> {
         assert!(self.duration_in_minutes > 0.0);
         assert!(self.starting_value != self.ending_value);
@@ -89,9 +68,6 @@ impl Effort {
     }
     pub fn to_mrc(&self, starting_minute: f64) -> (String, f64) {
         let end_of_effort = starting_minute + self.duration_in_minutes;
-        if is_ramp_effort(self) && effort_can_be_split(self) {
-            return (self.to_mrc_for_ramp_effort(starting_minute), end_of_effort);
-        }
         (
             format! {
                 "{}\t{}\n\
@@ -101,10 +77,6 @@ impl Effort {
         )
     }
     pub fn to_plan_format(&self) -> String {
-        if is_ramp_effort(self) && effort_can_be_split(self) {
-            return self.to_plan_format_ramp_effort();
-        }
-
         format!(
             "=INTERVAL=\n\
                 PWR_LO={}\n\
@@ -114,13 +86,6 @@ impl Effort {
             self.starting_value,
             (self.duration_in_minutes * 60.0).round() as i64
         )
-    }
-    fn to_plan_format_ramp_effort(&self) -> String {
-        self.split_ramp_effort_into_constant_chunks()
-            .iter()
-            .map(|effort| effort.to_plan_format())
-            .collect::<Vec<String>>()
-            .join("\n")
     }
 
     pub fn to_edit(&mut self) {
@@ -269,16 +234,8 @@ mod tests {
                     String::from(
                         "5.00\t100.00\n\
                 10.00\t100.00\n\
-                10.00\t105.00\n\
-                10.20\t105.00\n\
-                10.20\t115.00\n\
-                10.40\t115.00\n\
-                10.40\t125.00\n\
-                10.60\t125.00\n\
-                10.60\t135.00\n\
-                10.80\t135.00\n\
-                10.80\t145.00\n\
-                11.00\t145.00"
+                10.00\t100.00\n\
+                11.00\t150.00"
                     ),
                     11.0
                 )

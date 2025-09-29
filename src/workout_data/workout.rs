@@ -1,4 +1,4 @@
-use crate::workout_data::effort::Effort;
+use crate::workout_data::effort::{effort_can_be_split, is_ramp_effort, Effort};
 use crate::workout_data::{from_mrc, from_plan_format};
 
 #[derive(PartialEq, Debug)]
@@ -114,6 +114,12 @@ impl Workout {
     }
     /// Add a new effort to the workout.
     pub fn add_effort(&mut self, effort: Effort) {
+        if is_ramp_effort(&effort) && effort_can_be_split(&effort) {
+            for effort in effort.split_ramp_effort_into_constant_chunks() {
+                self.efforts.push(effort)
+            }
+            return;
+        }
         self.efforts.push(effort);
     }
     /// Remove an effort from a workout.
