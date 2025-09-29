@@ -100,6 +100,28 @@ impl Effort {
             end_of_effort,
         )
     }
+    pub fn to_plan_format(&self) -> String {
+        if is_ramp_effort(self) && effort_can_be_split(self) {
+            return self.to_plan_format_ramp_effort();
+        }
+
+        format!(
+            "=INTERVAL=\n\
+                PWR_LO={}\n\
+                PWR_HI={}\n\
+                MESG_DURATION_SEC>={}?EXIT",
+            self.starting_value,
+            self.starting_value,
+            (self.duration_in_minutes * 60.0).round() as i64
+        )
+    }
+    fn to_plan_format_ramp_effort(&self) -> String {
+        self.split_ramp_effort_into_constant_chunks()
+            .iter()
+            .map(|effort| effort.to_plan_format())
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
 
     pub fn to_edit(&mut self) {
         self.gui_state = EffortState::Editing {
