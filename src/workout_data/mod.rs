@@ -5,6 +5,7 @@ pub mod workout;
 pub mod effort;
 
 pub mod from_mrc;
+pub mod from_plan_format;
 
 pub trait ToMRC {
     fn to_mrc(&self) -> String;

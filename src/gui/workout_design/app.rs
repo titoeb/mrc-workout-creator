@@ -83,20 +83,32 @@ impl WorkoutDesigner {
         }
     }
     fn load_workout_from_file(&mut self) -> Task<WorkoutMessage> {
-        if let Some(mrc_file_to_read) = FileDialog::new()
+        if let Some(file_to_read) = FileDialog::new()
             .set_directory(path_or_home_directory(find_bike_computer()))
-            .add_filter("Only Select mrc files", &["mrc"])
+            .add_filter("MRC or Plan files", &["mrc", "plan"])
             .pick_file()
         {
-            if let Ok(mrc_to_load) = fs::read_to_string(mrc_file_to_read) {
-                match Workout::from_mrc(&mrc_to_load) {
-                    Ok(loaded_workout) => {
-                        *self = WorkoutDesigner::from(loaded_workout);
-                    }
-                    Err(error) => {
-                        eprintln!("Could not read in the MRC file because of:");
-                        eprintln!("{:?}", error);
-                    }
+            if let Ok(workout_to_load) = fs::read_to_string(&file_to_read) {
+                match file_to_read.extension().and_then(|e| e.to_str()) {
+                    Some("mrc") => match Workout::from_mrc(&workout_to_load) {
+                        Ok(loaded_workout) => {
+                            *self = WorkoutDesigner::from(loaded_workout);
+                        }
+                        Err(error) => {
+                            eprintln!("Could not read in the MRC file because of:");
+                            eprintln!("{:?}", error);
+                        }
+                    },
+                    Some("plan") => match Workout::from_plan_format(&workout_to_load) {
+                        Ok(loaded_workout) => {
+                            *self = WorkoutDesigner::from(loaded_workout);
+                        }
+                        Err(error) => {
+                            eprintln!("Could not read in the MRC file because of:");
+                            eprintln!("{:?}", error);
+                        }
+                    },
+                    Some(_) | None => panic!("Format not supported!"),
                 }
             }
         }
@@ -128,16 +140,22 @@ impl WorkoutDesigner {
             WorkoutDesignerMessage::ExportButtonPressed => {
                 if let Some(mrc_file_to_write_to) = FileDialog::new()
                     .set_directory(path_or_home_directory(find_bike_computer()))
-                    .add_filter("Only Select mrc files", &["mrc"])
+                    .add_filter("MRC or Plan Files", &["mrc", "plan"])
                     .save_file()
                 {
-                    if let Some(mut opened_mrc_file) =
-                        open_or_create(&make_it_mrc(mrc_file_to_write_to))
-                    {
-                        if let Err(error) = opened_mrc_file.write(self.workout.to_mrc().as_bytes())
+                    let mrc_file_to_write_to = &make_it_plan_if_none(mrc_file_to_write_to);
+                    if let Some(mut opened_mrc_file) = open_or_create(mrc_file_to_write_to) {
+                        if let Some(file_contents) =
+                            match mrc_file_to_write_to.extension().and_then(|e| e.to_str()) {
+                                Some("plan") => Some(self.workout.to_plan_format()),
+                                Some("mrc") => Some(self.workout.to_mrc()),
+                                Some(_) | None => None,
+                            }
                         {
-                            eprintln!("Could not write workout because of:");
-                            eprintln!("{}", error);
+                            if let Err(error) = opened_mrc_file.write(file_contents.as_bytes()) {
+                                eprintln!("Could not write workout because of:");
+                                eprintln!("{}", error);
+                            }
                         }
                     }
                 };
@@ -335,16 +353,18 @@ where
     widget(_focus_id(id))
 }
 
-fn make_it_mrc(mut path_to_mrc_file: path::PathBuf) -> path::PathBuf {
-    path_to_mrc_file.set_extension("mrc");
-    path_to_mrc_file
+fn make_it_plan_if_none(mut path_to_workout_file: path::PathBuf) -> path::PathBuf {
+    if path_to_workout_file.extension().is_none() {
+        path_to_workout_file.set_extension("plan");
+    }
+    path_to_workout_file
 }
 
 fn find_bike_computer() -> Option<PathBuf> {
     let mut potential_bike_computer: Vec<PathBuf> = dbg!(list_all_mounted_devices())
         .unwrap_or_default()
         .into_iter()
-        .filter(|path| dbg!(is_relevant_computer(path)))
+        .filter(|path| is_relevant_computer(path))
         .collect();
     match potential_bike_computer.len() {
         0 => None,

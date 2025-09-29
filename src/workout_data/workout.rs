@@ -1,19 +1,25 @@
 use crate::workout_data::effort::Effort;
-use crate::workout_data::from_mrc;
+use crate::workout_data::{from_mrc, from_plan_format};
 
 #[derive(PartialEq, Debug)]
-pub enum ExtractMRCError {
+pub enum ExtractWorkoutError {
     Description(from_mrc::ExtractDescriptionError),
     Efforts(from_mrc::ExtractEffortError),
+    FromPlanFormatError,
 }
-impl From<from_mrc::ExtractDescriptionError> for ExtractMRCError {
+impl From<from_mrc::ExtractDescriptionError> for ExtractWorkoutError {
     fn from(value: from_mrc::ExtractDescriptionError) -> Self {
         Self::Description(value)
     }
 }
-impl From<from_mrc::ExtractEffortError> for ExtractMRCError {
+impl From<from_mrc::ExtractEffortError> for ExtractWorkoutError {
     fn from(value: from_mrc::ExtractEffortError) -> Self {
         Self::Efforts(value)
+    }
+}
+impl From<from_plan_format::ExtractPlanFormatError> for ExtractWorkoutError {
+    fn from(_: from_plan_format::ExtractPlanFormatError) -> Self {
+        Self::FromPlanFormatError
     }
 }
 
@@ -46,6 +52,35 @@ impl Workout {
     /// Generate the mrc representation of a workout.
     pub fn to_mrc(&self) -> String {
         format!("{}\n{}", self.mrc_head(), self.mrc_body())
+    }
+
+    pub fn to_plan_format(&self) -> String {
+        format!("{}\n{}", self.plan_format_head(), self.plan_format_body())
+    }
+
+    fn plan_format_body(&self) -> String {
+        format!(
+            "=STREAM=\n\
+                {}",
+            self.efforts_in_plan_format()
+        )
+    }
+
+    fn efforts_in_plan_format(&self) -> String {
+        self.efforts
+            .iter()
+            .map(|effort| effort.to_plan_format())
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    fn plan_format_head(&self) -> String {
+        format! {
+            "=HEADER=\n\
+             NAME={}\n\
+            WORKOUT_TYPE=0",
+            self.name,
+        }
     }
 
     fn mrc_head(&self) -> String {
@@ -118,7 +153,7 @@ impl Workout {
             })
             .sum()
     }
-    pub fn from_mrc(mrc: &str) -> Result<Self, ExtractMRCError> {
+    pub fn from_mrc(mrc: &str) -> Result<Self, ExtractWorkoutError> {
         let description = match from_mrc::extract_description(mrc) {
             Ok(description) => description,
             Err(_) => "".to_string(),
@@ -129,6 +164,9 @@ impl Workout {
             description,
             efforts,
         })
+    }
+    pub fn from_plan_format(workout_in_plan_format: &str) -> Result<Self, ExtractWorkoutError> {
+        Ok(from_plan_format::extract_workout(workout_in_plan_format)?)
     }
 }
 
@@ -371,6 +409,88 @@ MINUTES WATTS
             let reserialized_workout =
                 Workout::from_mrc(&workout.to_mrc()).expect("Simple workout should be loadable");
             assert_eq!(workout, reserialized_workout)
+        }
+    }
+    mod to_plan_format {
+        use super::super::{Effort, Workout};
+
+        #[test]
+        fn to_header() {
+            assert_eq!(
+                Workout::new("Test Workout", "Test Workout Creation", vec![]).plan_format_head(),
+                "=HEADER=
+NAME=Test Workout
+WORKOUT_TYPE=0"
+            )
+        }
+        #[test]
+        fn to_body() {
+            assert_eq!(
+                Workout::new(
+                    "Test Workout",
+                    "Test Workout Creation",
+                    vec![
+                        Effort::new(0.5, 50.0, None),
+                        Effort::new(1.0, 100.0, None),
+                        Effort::new(1.5, 150.0, None),
+                        Effort::new(0.5, 200.0, None)
+                    ]
+                )
+                .plan_format_body(),
+                "=STREAM=
+=INTERVAL=
+PWR_LO=50
+PWR_HI=50
+MESG_DURATION_SEC>=30?EXIT
+=INTERVAL=
+PWR_LO=100
+PWR_HI=100
+MESG_DURATION_SEC>=60?EXIT
+=INTERVAL=
+PWR_LO=150
+PWR_HI=150
+MESG_DURATION_SEC>=90?EXIT
+=INTERVAL=
+PWR_LO=200
+PWR_HI=200
+MESG_DURATION_SEC>=30?EXIT"
+            )
+        }
+        #[test]
+        fn to_plan_format() {
+            assert_eq!(
+                Workout::new(
+                    "Test Workout",
+                    "Test Workout Creation",
+                    vec![
+                        Effort::new(0.5, 50.0, None),
+                        Effort::new(1.0, 100.0, None),
+                        Effort::new(1.5, 150.0, None),
+                        Effort::new(0.5, 200.0, None)
+                    ]
+                )
+                .to_plan_format(),
+                "=HEADER=
+NAME=Test Workout
+WORKOUT_TYPE=0
+=STREAM=
+=INTERVAL=
+PWR_LO=50
+PWR_HI=50
+MESG_DURATION_SEC>=30?EXIT
+=INTERVAL=
+PWR_LO=100
+PWR_HI=100
+MESG_DURATION_SEC>=60?EXIT
+=INTERVAL=
+PWR_LO=150
+PWR_HI=150
+MESG_DURATION_SEC>=90?EXIT
+=INTERVAL=
+PWR_LO=200
+PWR_HI=200
+MESG_DURATION_SEC>=30?EXIT"
+            )
         }
     }
 }
