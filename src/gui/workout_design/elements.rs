@@ -6,8 +6,9 @@ use crate::gui::style::{self, SMALL_BUTTON};
 use crate::gui::style::{pink_button, pink_text_input, WhiteText};
 use crate::workout_data::ToMRC;
 use crate::workout_data::{effort, workout};
-use iced::widget::{container, scrollable, Column, Row, TextInput};
-use iced::{Alignment, Element};
+use iced::widget::scrollable::Scrollbar;
+use iced::widget::{container, scrollable::Direction, Column, Row, Scrollable, TextInput};
+use iced::{Alignment, Element, Length};
 
 #[derive(Debug, Clone)]
 pub struct EffortUnitInput {
@@ -164,14 +165,18 @@ impl<'a> workout::Workout {
             Column::new()
                 .spacing(20)
                 .push(effort_string_headers())
-                .push(scrollable(
-                    self.efforts.iter().enumerate().fold(
-                        Column::new(),
-                        |scrollable, (effort_index, effort)| {
-                            scrollable.push(effort.view(effort_index))
-                        },
-                    ),
-                )),
+                .push(
+                    Scrollable::with_direction(
+                        self.efforts
+                            .iter()
+                            .enumerate()
+                            .fold(Column::new(), |column, (effort_index, effort)| {
+                                column.push(effort.view(effort_index))
+                            }),
+                        Direction::Vertical(Scrollbar::new()),
+                    )
+                    .height(Length::FillPortion(10)),
+                ),
         )
     }
 }
