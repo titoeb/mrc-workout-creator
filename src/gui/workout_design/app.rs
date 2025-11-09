@@ -143,6 +143,13 @@ impl WorkoutDesigner {
                     .add_filter("MRC or Plan Files", &["mrc", "plan"])
                     .save_file()
                 {
+                    if let Some(file_name) = file_to_write_to
+                        .file_name()
+                        .and_then(|maybe_string| maybe_string.to_str())
+                    {
+                        let new_workout_name = make_file_name_into_readable_workout_name(file_name);
+                        self.workout.set_name(dbg!(new_workout_name));
+                    }
                     let file_to_write_to = &make_it_plan_if_none(file_to_write_to);
                     if let Some(mut opened_file) = open_or_create(file_to_write_to) {
                         if let Some(file_contents) =
@@ -418,4 +425,123 @@ fn all_top_level_directories_exist(path: &Path) -> bool {
 
 fn path_or_home_directory(path: Option<PathBuf>) -> PathBuf {
     path.unwrap_or(home_dir().unwrap_or_default())
+}
+fn capitalize_words(sentence: String) -> String {
+    let mut capitalized = String::with_capacity(sentence.len());
+    let mut is_new_word = true;
+
+    for character in sentence.chars() {
+        if character.is_whitespace() {
+            is_new_word = true;
+            capitalized.push(character);
+        } else if is_new_word {
+            capitalized.extend(character.to_uppercase());
+            is_new_word = false;
+        } else {
+            capitalized.push(character);
+        }
+    }
+
+    capitalized
+}
+
+fn separate_into_words(file_name: &str) -> String {
+    file_name
+        .replace("-", " ")
+        .replace("_", " ")
+        .replace(".plan", "")
+        .replace(".mrc", "")
+}
+
+fn make_file_name_into_readable_workout_name(file_name: &str) -> String {
+    let separated = separate_into_words(file_name);
+    capitalize_words(separated)
+}
+
+#[cfg(test)]
+mod tests {
+
+    mod words {
+        use super::super::capitalize_words;
+        #[test]
+        fn two_words() {
+            assert_eq!(capitalize_words("hello world".into()), "Hello World");
+        }
+
+        #[test]
+        fn multiple_spaces() {
+            assert_eq!(
+                capitalize_words("hello   world".into()),
+                String::from("Hello   World")
+            );
+        }
+
+        #[test]
+        fn leading_and_trailing_spaces() {
+            assert_eq!(
+                capitalize_words("  hello world  ".into()),
+                "  Hello World  "
+            );
+        }
+
+        #[test]
+        fn mixed_case() {
+            assert_eq!(capitalize_words("hElLo WoRLd".into()), "HElLo WoRLd");
+        }
+
+        #[test]
+        fn empty_string() {
+            assert_eq!(capitalize_words("".into()), "");
+        }
+
+        #[test]
+        fn single_word() {
+            assert_eq!(capitalize_words("rust".into()), "Rust");
+        }
+        #[test]
+        fn workout_name() {
+            assert_eq!(
+                capitalize_words("interval 4x4M@100W(5M)".into()),
+                "Interval 4x4M@100W(5M)"
+            );
+        }
+    }
+
+    mod separate_into_words {
+        use super::super::separate_into_words;
+        #[test]
+        fn test_separate_into_words_basic() {
+            let input = "easy-ride";
+            let expected = "easy ride";
+            assert_eq!(separate_into_words(input), expected);
+        }
+
+        #[test]
+        fn test_separate_into_words_with_underscores() {
+            let input = "sweet_spot_training";
+            let expected = "sweet spot training";
+            assert_eq!(separate_into_words(input), expected);
+        }
+
+        #[test]
+        fn test_separate_into_words_with_mixed_delimiters() {
+            let input = "base-ride_endurance-session";
+            let expected = "base ride endurance session";
+            assert_eq!(separate_into_words(input), expected);
+        }
+
+        #[test]
+        fn test_separate_into_words_with_plan_extension() {
+            let input = "ftp_boost.plan";
+            let expected = "ftp boost";
+            assert_eq!(separate_into_words(input), expected);
+        }
+
+        #[test]
+        fn test_separate_into_words_with_mrc_extension() {
+            let input = "intervals_90x30.mrc";
+            let expected = "intervals 90x30";
+            assert_eq!(separate_into_words(input), expected);
+        }
+    }
 }
