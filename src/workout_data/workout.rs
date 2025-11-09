@@ -44,6 +44,9 @@ impl Workout {
             efforts,
         }
     }
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
     /// Create a new workout without any efforts.
     pub fn empty(name: &'_ str, description: &'_ str) -> Self {
         Self::new(name, description, vec![])
